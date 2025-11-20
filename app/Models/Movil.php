@@ -10,6 +10,7 @@ class Movil extends Model
 {
     use HasFactory;
 
+     protected $table = 'moviles';
     protected $fillable = ['modelo_id', 'color', 'grado', 'almacenamiento', 'stock'];
 
     public function modelo()
