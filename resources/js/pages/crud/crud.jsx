@@ -5,10 +5,10 @@ export default function Crud({ nombre_modelo, datos, columnas, campos, ObjetoEdi
   const [editando, setEditando] = useState(!!ObjetoEditando);
   const { data: datosFormulario, setData, post, put, reset, errors } = useForm(ObjetoEditando || {});
 
-     // Actualiza los campos del formulario a la hora de realizar una acción en este.
+  // Actualiza los campos del formulario a la hora de realizar una acción en este.
   const actualizarCampo = (e) => setData(e.target.name, e.target.value);
 
-    // Se encarga de modificar el formulario dependiendo de si se está editando o creando un nuevo registro.
+  // Se encarga de modificar el formulario dependiendo de si se está editando o creando un nuevo registro.
   const enviarFormulario = (e) => {
     e.preventDefault();
 
@@ -23,27 +23,25 @@ export default function Crud({ nombre_modelo, datos, columnas, campos, ObjetoEdi
     }
   };
 
-    // Función que se encarga de activar el modo edición del formulario.
-
+  // Función que se encarga de activar el modo edición del formulario.
   const modoEditar = (item) => {
     setEditando(true);
     setData(item);
   };
 
-    // Cancela la edición y borra el formulario
+  // Cancela la edición y borra el formulario
   const cancelarEdicion = () => {
     reset();
     setEditando(false);
   };
 
-    // Elimina un registro con confirmación
+  // Elimina un registro con confirmación
   const eliminar = (id) => {
     if (confirm('¿Seguro que quieres eliminarlo?')) {
       router.delete(`/${nombre_modelo}/${id}`);
     }
   };
-
-   // Estilos temporales
+    // Estilos temporales
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">{nombre_modelo.toUpperCase()}</h1>
@@ -51,14 +49,31 @@ export default function Crud({ nombre_modelo, datos, columnas, campos, ObjetoEdi
       <form onSubmit={enviarFormulario} className="mb-6 border p-4 rounded">
         {campos.map((camp) => (
           <div key={camp.name} className="mb-2">
-            <label className="block font-medium">{camp.label}</label>
-            <input
-              type={camp.type || 'text'}
-              name={camp.name}
-              value={datosFormulario[camp.name] || ''}
-              onChange={actualizarCampo}
-              className="border rounded px-2 py-1 w-full"
-            />
+            <label className="block font-medium ">{camp.label}</label>
+            {camp.type === 'select' ? (
+              <select
+                name={camp.name}
+                value={datosFormulario[camp.name] || ''}
+                onChange={actualizarCampo}
+                className="border rounded px-2 py-1 w-full "
+              >
+                <option className="text-black" value="">Selecciona una opción</option>
+                {camp.options.map((opcion) => (
+                  <option key={opcion.value} value={opcion.value} className='text-black'>
+                    {opcion.label}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type={camp.type || 'text'}
+                name={camp.name}
+                value={datosFormulario[camp.name] || ''}
+                onChange={actualizarCampo}
+                className="border rounded px-2 py-1 w-full"
+              />
+            )}
+
             {errors[camp.name] && (
               <p className="text-red-500 text-sm mt-1">{errors[camp.name]}</p>
             )}
