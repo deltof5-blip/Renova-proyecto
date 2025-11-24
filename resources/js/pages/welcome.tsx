@@ -1,6 +1,7 @@
 import { dashboard, login, register } from '@/routes';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
+import { Button } from "@/components/ui/button";
 
 export default function Welcome({
     canRegister = true,
@@ -132,6 +133,14 @@ export default function Welcome({
                                     >
                                         Deploy now
                                     </a>
+                                    <Button variant="delete">Borrar</Button>
+                                    <Button variant="confirm">Confirmar</Button>
+                                    <Button variant="default">Principal</Button>
+                                    <Button variant="outlineGray">Botón 3</Button>
+                                    <Button variant="outlinePurple">Botón 4</Button>
+                                    <Button variant="secondary">Botón 2</Button>
+
+
                                 </li>
                             </ul>
                         </div>
