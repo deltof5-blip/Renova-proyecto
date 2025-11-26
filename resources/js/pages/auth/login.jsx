@@ -10,6 +10,8 @@ import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
+import { Textarea } from "@/components/ui/textarea";
+
 import {
   Select,
   SelectTrigger,
@@ -125,6 +127,12 @@ export default function Login({
       <p className="mt-4 text-lg">
         Valor seleccionado: <strong>{valor}</strong>
       </p>
+
+            <Textarea
+        label="Descripción del problema"
+        placeholder="Escribe aquí los detalles..."
+        required
+      />
     </div>
 
                         {canRegister && (
