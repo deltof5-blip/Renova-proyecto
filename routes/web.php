@@ -10,13 +10,9 @@ use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ComponenteController;
 use App\Http\Controllers\ReparacionController;
 use App\Http\Controllers\BuscarController;
+use App\Http\Controllers\HomeController;
 
-
-Route::get('/', function () {
-    return Inertia::render('welcome', [
-        'canRegister' => Features::enabled(Features::registration()),
-    ]);
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/buscar', [BuscarController::class, 'index'])->name('buscar');
 

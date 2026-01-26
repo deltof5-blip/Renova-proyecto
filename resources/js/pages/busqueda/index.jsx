@@ -46,7 +46,7 @@ export default function Busqueda({
         </div>
 
         <div className="flex flex-col gap-8 lg:flex-row">
-          <aside className="w-full max-w-[280px] space-y-4">
+          <aside className="w-full max-w-xs space-y-4">
             <BarraLateral titulo="Filtros" />
             <BarraLateral titulo="Tipo">
               <FiltroRadio
