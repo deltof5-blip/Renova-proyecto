@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Movil;
+use App\Support\Colores;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class BuscarController extends Controller
 {
+    use Colores;
     public function index(Request $request)
     {
         // Obtenemos la busqueda y filtros.
@@ -153,16 +155,7 @@ class BuscarController extends Controller
             ->values()
             ->all();
 
-        $colores = [];
-        if (count($modelosIds) > 0) {
-            $colores = Movil::query()
-                ->whereIn('modelo_id', $modelosIds)
-                ->get()
-                ->groupBy('modelo_id')
-                ->map(function ($group) {
-                    return $group->pluck('color')->unique()->values()->all();
-                });
-        }
+        $colores = $this->ponerColores($modelosIds);
 
         return $productos->map(function ($producto) use ($colores) {
             if ($producto->tipo === 'modelo') {

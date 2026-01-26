@@ -68,7 +68,7 @@ export default function BarraBusqueda() {
   }
 
   return (
-    <div ref={contenedorRef} className="relative w-full max-w-[460px]">
+    <div ref={contenedorRef} className="relative w-full max-w-lg">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
         <input
@@ -85,7 +85,7 @@ export default function BarraBusqueda() {
             }
           }}
           placeholder="Buscar producto..."
-          className="h-11 w-full rounded-full border border-gray-200 bg-white px-9 text-[15px] text-gray-900 shadow-sm focus:border-gray-300 focus:outline-none"
+          className="h-11 w-full rounded-full border border-gray-200 bg-white px-9 text-base text-gray-900 shadow-sm focus:border-gray-300 focus:outline-none"
         />
         {consulta && (
           <button
