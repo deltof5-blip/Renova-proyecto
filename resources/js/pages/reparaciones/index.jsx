@@ -1,6 +1,7 @@
 import AppLayout from "@/layouts/renova-layout";
 import { Button } from "@/components/ui/button";
 import Banner from "@/components/Banner";
+import ReparacionModal from "@/components/reparaciones/ReparacionModal";
 import {
   Collapsible,
   CollapsibleContent,
@@ -17,7 +18,7 @@ import {
   Wrench,
 } from "lucide-react";
 
-// Reparaciones disponibles ejemplos:
+// Reparaciones
 const servicios = [
   { id: 1, titulo: "Pantalla", descripcion: "Sustitución de pantalla táctil y LCD.", icono: Smartphone },
   { id: 2, titulo: "Batería", descripcion: "Sustitución con batería totalmente nueva.", icono: BatteryCharging },
@@ -70,18 +71,18 @@ export default function Reparaciones() {
             <img
               src="https://reparacionemovil.com/img/cms/mobil%20repara.jpg"
               alt="Reparación de smartphone"
-              className="w-full max-w-xl rounded-3xl object-contain shadow-md"
+              className="w-full max-w-xl rounded-2xl object-contain"
             />
           }
         >
-          <Button>Seleccionar reparación</Button>
+          <ReparacionModal />
           <a href="#servicios">
             <Button variant="outlineGray">Consultar servicios</Button>
           </a>
         </Banner>
 
-        <section id="servicios" className="relative mt-16 overflow-hidden bg-slate-100">
-          <div className="relative mx-auto w-full max-w-7xl px-6 py-24 md:px-10">
+        <section id="servicios" className="mt-16 bg-slate-100">
+          <div className="mx-auto max-w-7xl px-6 py-20">
             <div className="text-center">
               <h2 className="text-3xl font-semibold text-slate-900 sm:text-4xl">
                 Nuestros <span className="text-violet-600">Servicios</span>
@@ -91,15 +92,15 @@ export default function Reparaciones() {
               </p>
             </div>
 
-            <div className="mt-16 grid gap-6 sm:grid-cols-2 md:grid-cols-4">
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 md:grid-cols-4">
               {servicios.map((servicio) => {
                 const Icono = servicio.icono;
                 return (
                   <div
                     key={servicio.id}
-                    className="group mx-auto flex w-full max-w-xs flex-col items-center rounded-3xl border border-slate-200/80 bg-white px-6 py-8 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                    className="mx-auto flex w-full max-w-xs flex-col items-center rounded-2xl border border-slate-200 bg-white px-5 py-6 text-center shadow-sm"
                   >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-linear-to-br from-violet-100 to-pink-100 text-violet-600 shadow-sm">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-100 text-violet-600">
                       <Icono className="h-7 w-7" />
                     </div>
                     <h3 className="mt-5 text-base font-semibold text-slate-900">
@@ -115,8 +116,8 @@ export default function Reparaciones() {
           </div>
         </section>
 
-        <section className="mt-16 bg-linear-to-r ">
-          <div className="mx-auto w-full max-w-6xl px-6 pb-32 pt-24">
+        <section className="mt-16">
+          <div className="mx-auto max-w-6xl px-6 py-20">
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-3xl font-semibold text-slate-900 sm:text-4xl">
                 Preguntas{" "}
@@ -129,13 +130,13 @@ export default function Reparaciones() {
               </p>
             </div>
 
-            <div className="mt-16 grid gap-4 pb-16">
-              {preguntas.map((item, index) => (
+            <div className="mt-12 grid gap-4 pb-12">
+              {preguntas.map((item) => (
                 <Collapsible
                   key={item.pregunta}
                 >
-                  <div className="relative rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm backdrop-blur-sm">
-                    <CollapsibleTrigger className="absolute inset-0 cursor-pointer rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-300">
+                  <div className="relative rounded-2xl border border-slate-200 bg-white p-5">
+                    <CollapsibleTrigger className="absolute inset-0 cursor-pointer rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-200">
                       <span className="sr-only">Abrir o cerrar pregunta</span>
                     </CollapsibleTrigger>
                     <div className="flex items-center justify-between text-left text-sm font-semibold text-slate-900">

@@ -15,6 +15,7 @@ const buttonVariants = cva(
         secondary: "bg-gradient-to-r from-[#9747FF] to-[#2F88FF] shadow-md",
         outlineGray: "border border-gray-300 text-black bg-transparent",
         outlinePurple: "border border-[#9747FF] text-black bg-transparent",
+        tarjeta:"relative flex h-full w-full flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white px-6 py-8 text-center font-normal text-slate-900 shadow-sm transition hover:shadow-md",
         social: 'border-gray-300 flex items-center justify-center text-muted-foreground'
       },
       size: {
