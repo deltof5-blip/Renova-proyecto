@@ -2,6 +2,7 @@ import { useState } from "react";
 import AppLayout from "@/layouts/renova-layout";
 import { Button } from "@/components/ui/button";
 import BarraLateral from "@/components/barra-lateral";
+import { router } from "@inertiajs/react";
 
 const colores = {
   Negro: "bg-black",
@@ -76,7 +77,17 @@ export default function Producto({
 
               <BarraLateral titulo="">Descripción</BarraLateral>
 
-              <Button variant="default" className="h-12 w-full rounded-full text-base">
+              <Button
+                variant="default"
+                className="h-12 w-full rounded-full text-base"
+                onClick={() =>
+                  router.post("/carrito/productos", {
+                    tipo: "componente",
+                    id: componente.id,
+                    cantidad: 1,
+                  })
+                }
+              >
                 Añadir al carrito
               </Button>
             </div>
@@ -180,7 +191,7 @@ export default function Producto({
               <div className="flex items-center justify-between text-sm font-semibold">
                 <span className="text-slate-900">
                   Estado: <span className="text-violet-600">Excelente</span>
-                </span>delos/24
+                </span>
                 <span className="text-violet-600">¿Qué significa?</span>
               </div>
               <div className="mt-6 grid gap-6 sm:grid-cols-2">
@@ -206,7 +217,7 @@ export default function Producto({
                           Etiquetas[item.color] || "bg-slate-500"
                         }`}
                       >
-                        {item.tag}delos/24
+                        {item.tag}
                       </span>
                     </div>
                     <div className="flex h-full flex-col items-center justify-center text-center">
@@ -280,7 +291,22 @@ export default function Producto({
               </div>
             </BarraLateral>
 
-            <Button variant="default" className="h-12 w-full rounded-full text-base">
+            <Button
+              variant="default"
+              className="h-12 w-full rounded-full text-base"
+              onClick={() =>
+                router.post("/carrito/productos", {
+                  tipo: "movil",
+                  id: modelo.id,
+                  cantidad,
+                  variante: {
+                    color: colorActivo,
+                    grado: gradoActivo,
+                    almacenamiento: capacidadActiva,
+                  },
+                })
+              }
+            >
               Añadir al carrito
             </Button>
           </div>

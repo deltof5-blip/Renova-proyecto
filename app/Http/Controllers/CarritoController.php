@@ -1,0 +1,246 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\ProductoCarrito;
+use App\Models\Componente;
+use App\Models\Modelo;
+use App\Models\Movil;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
+
+class CarritoController extends Controller
+{
+    public function index(Request $request)
+    {
+        $user = $request->user();
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
+        return Inertia::render('carrito/index', [
+            'carrito' => $this->logicaCarrito($user->id),
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        // Se comprueba que haya un usuario logeado.
+        $user = $request->user();
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
+        // Validacion
+        $data = $request->validate([
+            'tipo' => 'required|in:movil,componente',
+            'id' => 'required|integer',
+            'cantidad' => 'nullable|integer|min:1',
+            'variante' => 'nullable|array',
+        ]);
+
+        $cantidad =  ($data['cantidad'] ?? 1);
+
+
+        // Si es componente:
+
+        if ($data['tipo'] === 'componente') {
+            $componente = Componente::findOrFail($data['id']);
+            if ($componente->stock < $cantidad) {
+                throw ValidationException::withMessages([
+                    'stock' => ['No hay stock suficiente.'],
+                ]);
+            }
+
+        // Crea un ProductoCarrito o selecciona el primero existente.
+            $producto = ProductoCarrito::firstOrNew([
+                'user_id' => $user->id,
+                'producto_type' => Componente::class,
+                'producto_id' => $componente->id,
+            ]);
+
+            // Actualiza la cantidad y el precio unitario.
+            $producto->cantidad = ($producto->cantidad ?? 0) + $cantidad;
+            $producto->precio_unitario = $componente->precio;
+            $producto->save();
+        }
+
+        // Si es móvil:
+
+        if ($data['tipo'] === 'movil') {
+            // Obtener el modelo y la variante seleccionada.
+            $modelo = Modelo::with('marca')->findOrFail($data['id']);
+            $color = $data['variante']['color'];
+            $grado = $data['variante']['grado'];
+            $almacenamiento = $data['variante']['almacenamiento'];
+
+            // Buscar el móvil específico según la variante o lanzar error si no existe.
+            $movil = Movil::where('modelo_id', $modelo->id)
+                ->where('color', $color)
+                ->where('grado', $grado)
+                ->where('almacenamiento', $almacenamiento)
+                ->first();
+
+            if (! $movil) {
+                throw ValidationException::withMessages([
+                    'variante' => ['Esa variante no está disponible.'],
+                ]);
+            }
+
+            // Validar stock disponible y calcular precio.
+
+            if ($movil->stock < $cantidad) {
+                throw ValidationException::withMessages([
+                    'stock' => ['No hay stock suficiente.'],
+                ]);
+            }
+
+            $precio = $this->precioMovil($modelo->precio_base, $grado, $almacenamiento);
+
+            // Crea un ProductoCarrito o selecciona el primero existente.
+            $producto = ProductoCarrito::firstOrNew([
+                'user_id' => $user->id,
+                'producto_type' => Movil::class,
+                'producto_id' => $movil->id,
+            ]);
+
+            // Actualiza la cantidad y el precio unitario.
+            $producto->cantidad = ($producto->cantidad ?? 0) + $cantidad;
+            $producto->precio_unitario = $precio;
+            $producto->save();
+        }
+
+        return back()->with('success', 'Añadido al carrito.');
+    }
+
+    public function update(Request $request, ProductoCarrito $productoCarrito)
+    {
+
+        // Se comprueba que haya un usuario logeado.
+        $user = $request->user();
+        if (! $user) {
+            return redirect()->route('login');
+        }
+        // Validacion
+        $data = $request->validate([
+            'cantidad' => 'required|integer|min:1',
+        ]);
+
+        // Se actualiza la cantidad del producto en el carrito.
+
+        $productoCarrito->cantidad = $data['cantidad'];
+        $productoCarrito->save();
+
+        return back();
+    }
+
+    // Borra un producto especifico.
+    public function destroy(Request $request, ProductoCarrito $productoCarrito)
+    {
+        $user = $request->user();
+        if (! $user || $productoCarrito->user_id !== $user->id) {
+            return redirect()->route('login');
+        }
+
+        $productoCarrito->delete();
+
+        return back();
+    }
+
+    // Borra todos los productos del usuario.
+    public function clear(Request $request)
+    {
+        $user = $request->user();
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
+        ProductoCarrito::where('user_id', $user->id)->delete();
+
+        return back();
+    }
+
+    private function logicaCarrito(int $userId)
+    {
+        //filas que devolveran al frontend
+        $productos = [];
+        $subtotal = 0;
+        $cantidad = 0;
+
+        // Obtiene los productos del carrito del usuario
+
+        $filas = ProductoCarrito::with('producto')
+            ->where('user_id', $userId)
+            ->get();
+
+            // Recorre los productos para sacar los datos de la variante especifica si es un movil.
+        foreach ($filas as $producto) {
+            $datos = [];
+            if ($producto->producto_type === Movil::class) {
+                $datos = [
+                    'color' => $producto->producto->color,
+                    'grado' => $producto->producto->grado,
+                    'almacenamiento' => $producto->producto->almacenamiento,
+                ];
+            }
+
+            // Se prepara cada fila para el frontent con los datos necesarios.
+            $fila = [
+                'id' => $producto->id,
+                'tipo' => $producto->producto_type === Movil::class ? 'movil' : 'componente',
+                'nombre' => $this->nombreProducto($producto),
+                'precio' => $producto->precio_unitario,
+                'cantidad' => $producto->cantidad,
+                'datos' => $datos,
+            ];
+
+            // Se añaden al array y se actualizan subtotal y cantidad total.
+            $productos[] = $fila;
+            $subtotal += $fila['precio'] * $fila['cantidad'];
+            $cantidad += $fila['cantidad'];
+        }
+
+        return [
+            'productos' => $productos,
+            'subtotal' => round($subtotal, 2),
+            'cantidad' => $cantidad,
+        ];
+    }
+
+    private function nombreProducto($producto)
+    {
+
+        if ($producto->producto_type === Movil::class) {
+            $marca = $producto->producto->modelo->marca->nombre;
+            $modelo = $producto->producto->modelo;
+            return trim($marca . ' ' . ($modelo->nombre));
+        }
+
+        if ($producto->producto_type === Componente::class) {
+            return $producto->producto->nombre;
+        }
+
+        return 'Producto';
+    }
+
+
+    private function precioMovil( $precioBase, $grado, $almacenamiento)
+    {
+        $descuentoGrado = [
+            'S' => 0.05,
+            'A+' => 0.15,
+            'A' => 0.25,
+            'B' => 0.35,
+        ][$grado];
+
+        $descuentoCapacidad = [
+            128 => 0.15,
+            256 => 0.10,
+            512 => 0.05,
+            1024 => 0.0,
+        ][$almacenamiento];
+
+        return round($precioBase * (1 - $descuentoGrado) * (1 - $descuentoCapacidad), 2);
+    }
+}

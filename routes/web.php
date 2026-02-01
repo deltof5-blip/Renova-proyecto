@@ -11,6 +11,7 @@ use App\Http\Controllers\ComponenteController;
 use App\Http\Controllers\ReparacionController;
 use App\Http\Controllers\BuscarController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\CarritoController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/buscar', [BuscarController::class, 'index'])->name('buscar');
@@ -38,5 +39,11 @@ Route::resource('reparaciones', ReparacionController::class)
 
 Route::get('admin/reparaciones', [ReparacionController::class, 'admin'])
     ->name('reparaciones.admin');
+
+Route::get('carrito', [CarritoController::class, 'index'])->name('carrito.index');
+Route::post('carrito/productos', [CarritoController::class, 'store'])->name('carrito.store');
+Route::patch('carrito/productos/{productoCarrito}', [CarritoController::class, 'update'])->name('carrito.update');
+Route::delete('carrito/productos/{productoCarrito}', [CarritoController::class, 'destroy'])->name('carrito.destroy');
+Route::delete('carrito', [CarritoController::class, 'clear'])->name('carrito.clear');
 
 require __DIR__.'/settings.php';
