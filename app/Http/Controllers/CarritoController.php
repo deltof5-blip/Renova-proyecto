@@ -33,47 +33,54 @@ class CarritoController extends Controller
         }
 
         // Validacion
-        $data = $request->validate([
+        $datos = $request->validate([
             'tipo' => 'required|in:movil,componente',
             'id' => 'required|integer',
             'cantidad' => 'nullable|integer|min:1',
             'variante' => 'nullable|array',
         ]);
 
-        $cantidad =  ($data['cantidad'] ?? 1);
+        $cantidad = ($datos['cantidad'] !== null ? $datos['cantidad'] : 1);
 
 
         // Si es componente:
 
-        if ($data['tipo'] === 'componente') {
-            $componente = Componente::findOrFail($data['id']);
+        if ($datos['tipo'] === 'componente') {
+            $componente = Componente::findOrFail($datos['id']);
             if ($componente->stock < $cantidad) {
                 throw ValidationException::withMessages([
                     'stock' => ['No hay stock suficiente.'],
                 ]);
             }
 
-        // Crea un ProductoCarrito o selecciona el primero existente.
+            // Crea un ProductoCarrito o selecciona el primero existente.
             $producto = ProductoCarrito::firstOrNew([
                 'user_id' => $user->id,
                 'producto_type' => Componente::class,
                 'producto_id' => $componente->id,
             ]);
 
+            $cantidadActual = $producto->cantidad !== null ? $producto->cantidad : 0;
+            if ($cantidadActual + $cantidad > $componente->stock) {
+                throw ValidationException::withMessages([
+                    'stock' => ['No hay stock suficiente.'],
+                ]);
+            }
+
             // Actualiza la cantidad y el precio unitario.
-            $producto->cantidad = ($producto->cantidad ?? 0) + $cantidad;
+            $producto->cantidad = ($producto->cantidad !== null ? $producto->cantidad : 0) + $cantidad;
             $producto->precio_unitario = $componente->precio;
             $producto->save();
         }
 
         // Si es móvil:
 
-        if ($data['tipo'] === 'movil') {
+        if ($datos['tipo'] === 'movil') {
             // Obtener el modelo y la variante seleccionada.
-            $modelo = Modelo::with('marca')->findOrFail($data['id']);
-            $color = $data['variante']['color'];
-            $grado = $data['variante']['grado'];
-            $almacenamiento = $data['variante']['almacenamiento'];
+            $modelo = Modelo::with('marca')->findOrFail($datos['id']);
+            $color = $datos['variante']['color'];
+            $grado = $datos['variante']['grado'];
+            $almacenamiento = $datos['variante']['almacenamiento'];
 
             // Buscar el móvil específico según la variante o lanzar error si no existe.
             $movil = Movil::where('modelo_id', $modelo->id)
@@ -105,8 +112,15 @@ class CarritoController extends Controller
                 'producto_id' => $movil->id,
             ]);
 
+            $cantidadActual = $producto->cantidad !== null ? $producto->cantidad : 0;
+            if ($cantidadActual + $cantidad > $movil->stock) {
+                throw ValidationException::withMessages([
+                    'stock' => ['No hay stock suficiente.'],
+                ]);
+            }
+
             // Actualiza la cantidad y el precio unitario.
-            $producto->cantidad = ($producto->cantidad ?? 0) + $cantidad;
+            $producto->cantidad = ($producto->cantidad !== null ? $producto->cantidad : 0) + $cantidad;
             $producto->precio_unitario = $precio;
             $producto->save();
         }
@@ -119,13 +133,20 @@ class CarritoController extends Controller
 
         // Se comprueba que haya un usuario logeado.
         $user = $request->user();
-        if (! $user) {
+        if (! $user || $productoCarrito->user_id !== $user->id) {
             return redirect()->route('login');
         }
         // Validacion
         $data = $request->validate([
             'cantidad' => 'required|integer|min:1',
         ]);
+
+        $stockDisponible = $productoCarrito->producto->stock !== null ? $productoCarrito->producto->stock : 0;
+        if ($data['cantidad'] > $stockDisponible) {
+            throw ValidationException::withMessages([
+                'stock' => ['No hay stock suficiente.'],
+            ]);
+        }
 
         // Se actualiza la cantidad del producto en el carrito.
 
@@ -149,7 +170,7 @@ class CarritoController extends Controller
     }
 
     // Borra todos los productos del usuario.
-    public function clear(Request $request)
+    public function vaciar(Request $request)
     {
         $user = $request->user();
         if (! $user) {
@@ -193,6 +214,7 @@ class CarritoController extends Controller
                 'precio' => $producto->precio_unitario,
                 'cantidad' => $producto->cantidad,
                 'datos' => $datos,
+                'stock' => $producto->producto->stock !== null ? $producto->producto->stock : 0,
             ];
 
             // Se añaden al array y se actualizan subtotal y cantidad total.

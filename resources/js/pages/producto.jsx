@@ -45,6 +45,7 @@ export default function Producto({
     const subtitulo = componente.subtitulo;
     const precio = Math.round(componente.precio);
     const imagen = componente.imagen || imagenes[0];
+    const stockDisponible = componente.stock_disponible;
 
     return (
       <AppLayout>
@@ -77,19 +78,25 @@ export default function Producto({
 
               <BarraLateral titulo="">Descripción</BarraLateral>
 
-              <Button
-                variant="default"
-                className="h-12 w-full rounded-full text-base"
-                onClick={() =>
-                  router.post("/carrito/productos", {
-                    tipo: "componente",
-                    id: componente.id,
-                    cantidad: 1,
-                  })
-                }
-              >
-                Añadir al carrito
-              </Button>
+              <div className="space-y-2">
+                <p className="text-sm text-slate-500">
+                  Stock disponible: <span className="font-semibold">{stockDisponible}</span>
+                </p>
+                <Button
+                  variant="default"
+                  className="h-12 w-full rounded-full text-base"
+                  disabled={stockDisponible <= 0}
+                  onClick={() =>
+                    router.post("/carrito/productos", {
+                      tipo: "componente",
+                      id: componente.id,
+                      cantidad: 1,
+                    })
+                  }
+                >
+                  Añadir al carrito
+                </Button>
+              </div>
             </div>
           </div>
         </div>

@@ -44,6 +44,6 @@ Route::get('carrito', [CarritoController::class, 'index'])->name('carrito.index'
 Route::post('carrito/productos', [CarritoController::class, 'store'])->name('carrito.store');
 Route::patch('carrito/productos/{productoCarrito}', [CarritoController::class, 'update'])->name('carrito.update');
 Route::delete('carrito/productos/{productoCarrito}', [CarritoController::class, 'destroy'])->name('carrito.destroy');
-Route::delete('carrito', [CarritoController::class, 'clear'])->name('carrito.clear');
+Route::delete('carrito', [CarritoController::class, 'vaciar'])->name('carrito.vaciar');
 
 require __DIR__.'/settings.php';

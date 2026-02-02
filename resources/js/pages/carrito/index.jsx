@@ -47,13 +47,17 @@ export default function Carrito({ carrito }) {
                   <input
                     type="number"
                     min="1"
+                    max={producto.stock}
                     defaultValue={producto.cantidad}
                     className="w-20 rounded-md border border-slate-200 px-2 py-1 text-sm"
                     onBlur={(e) =>
                       router.patch(`/carrito/productos/${producto.id}`, {
-                        cantidad: e.target.value ,
+                        cantidad: (() => {
+                        return e.target.value = Math.min(Math.max(Number(e.target.value), 1), producto.stock);
+
+                        })(),
                       })
-                    }Continuar
+                    }
                   />
                   <span className="text-sm text-slate-700">
                     {(producto.precio * producto.cantidad).toFixed(2)} €
