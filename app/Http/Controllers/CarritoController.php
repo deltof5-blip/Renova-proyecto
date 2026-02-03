@@ -6,9 +6,13 @@ use App\Models\ProductoCarrito;
 use App\Models\Componente;
 use App\Models\Modelo;
 use App\Models\Movil;
+use App\Models\Pedido;
+use App\Models\PedidoProducto;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Stripe\Stripe;
+use Stripe\Checkout\Session as StripeSession;
 
 class CarritoController extends Controller
 {
@@ -180,6 +184,146 @@ class CarritoController extends Controller
         ProductoCarrito::where('user_id', $user->id)->delete();
 
         return back();
+    }
+
+    public function checkout(Request $request)
+    {
+        $user = $request->user();
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
+        $productosCarrito = ProductoCarrito::with('producto')
+            ->where('user_id', $user->id)
+            ->get();
+
+        if ($productosCarrito->isEmpty()) {
+            return redirect()->route('carrito.index')
+                ->with('error', 'Tu carrito está vacío.');
+        }
+
+        $lineItems = [];
+        foreach ($productosCarrito as $producto) {
+            $nombre = $this->nombreProducto($producto);
+            $descripcion = '';
+            if ($producto->producto_type === Movil::class) {
+                $descripcion = $producto->producto->color . ' · '
+                    . $producto->producto->grado . ' · '
+                    . $producto->producto->almacenamiento . 'GB';
+            }
+
+            $lineItems[] = [
+                'price_data' => [
+                    'currency' => 'eur',
+                    'product_data' => [
+                        'name' => $nombre,
+                        'description' => $descripcion,
+                    ],
+                    'unit_amount' => round($producto->precio_unitario * 100),
+                ],
+                'quantity' => $producto->cantidad,
+            ];
+        }
+
+        $secret = config('services.stripe.secret');
+        if (! $secret) {
+            return redirect()->route('carrito.index')
+                ->with('error', 'Stripe no está configurado.');
+        }
+
+        Stripe::setApiKey($secret);
+
+        $session = StripeSession::create([
+            'mode' => 'payment',
+            'payment_method_types' => ['card'],
+            'line_items' => $lineItems,
+            'customer_email' => $user->email,
+            'success_url' => route('carrito.success') . '?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => route('carrito.cancel'),
+        ]);
+
+        return Inertia::location($session->url);
+    }
+
+    public function success(Request $request)
+    {
+        $user = $request->user();
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
+        $sessionId = $request->query('session_id');
+        if (! $sessionId) {
+            return redirect()->route('carrito.index')
+                ->with('error', 'No se pudo confirmar el pago.');
+        }
+
+        $secret = config('services.stripe.secret');
+        if (! $secret) {
+            return redirect()->route('carrito.index')
+                ->with('error', 'Stripe no está configurado.');
+        }
+
+        Stripe::setApiKey($secret);
+        $session = StripeSession::retrieve($sessionId);
+
+        $estado = $session->payment_status === 'paid' ? 'pagado' : 'pendiente';
+        $total = $session->amount_total ? $session->amount_total / 100 : 0;
+
+        $pedido = Pedido::firstOrCreate(
+            ['stripe_sesion_id' => $session->id],
+            [
+                'user_id' => $user->id,
+                'estado' => $estado,
+                'total' => $total,
+            ]
+        );
+
+        if ($pedido->wasRecentlyCreated) {
+            $productosCarrito = ProductoCarrito::with('producto')
+                ->where('user_id', $user->id)
+                ->get();
+
+            foreach ($productosCarrito as $producto) {
+                $datos = null;
+                if ($producto->producto_type === Movil::class) {
+                    $datos = [
+                        'color' => $producto->producto->color,
+                        'grado' => $producto->producto->grado,
+                        'almacenamiento' => $producto->producto->almacenamiento,
+                    ];
+                }
+
+                PedidoProducto::create([
+                    'pedido_id' => $pedido->id,
+                    'producto_type' => $producto->producto_type,
+                    'producto_id' => $producto->producto_id,
+                    'nombre' => $this->nombreProducto($producto),
+                    'precio_unitario' => $producto->precio_unitario,
+                    'cantidad' => $producto->cantidad,
+                    'datos' => $datos,
+                ]);
+
+                $stockActual = $producto->producto->stock !== null ? $producto->producto->stock : 0;
+                $nuevoStock = $stockActual - $producto->cantidad;
+                if ($nuevoStock < 0) {
+                    $nuevoStock = 0;
+                }
+                $producto->producto->stock = $nuevoStock;
+                $producto->producto->save();
+            }
+
+            ProductoCarrito::where('user_id', $user->id)->delete();
+        }
+
+        return redirect()->route('carrito.index')
+            ->with('success', 'Pago realizado correctamente.');
+    }
+
+    public function cancel(Request $request)
+    {
+        return redirect()->route('carrito.index')
+            ->with('error', 'Pago cancelado.');
     }
 
     private function logicaCarrito(int $userId)

@@ -45,5 +45,8 @@ Route::post('carrito/productos', [CarritoController::class, 'store'])->name('car
 Route::patch('carrito/productos/{productoCarrito}', [CarritoController::class, 'update'])->name('carrito.update');
 Route::delete('carrito/productos/{productoCarrito}', [CarritoController::class, 'destroy'])->name('carrito.destroy');
 Route::delete('carrito', [CarritoController::class, 'vaciar'])->name('carrito.vaciar');
+Route::post('carrito/checkout', [CarritoController::class, 'checkout'])->name('carrito.checkout');
+Route::get('carrito/success', [CarritoController::class, 'success'])->name('carrito.success');
+Route::get('carrito/cancel', [CarritoController::class, 'cancel'])->name('carrito.cancel');
 
 require __DIR__.'/settings.php';

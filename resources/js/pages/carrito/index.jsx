@@ -86,7 +86,16 @@ export default function Carrito({ carrito }) {
         </div>
 
         <div className="mt-6 flex justify-end">
-          <Button disabled={productos.length === 0}>Continuar</Button>
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              variant="default"
+              disabled={productos.length === 0}
+              onClick={() => router.post("/carrito/checkout")}
+            >
+              Pagar con Stripe
+            </Button>
+          </div>
         </div>
       </div>
     </AppLayout>
