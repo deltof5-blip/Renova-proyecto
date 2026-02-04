@@ -5,6 +5,7 @@ import { cn, isSameUrl, resolveUrl } from '@/lib/utils';
 import { edit } from '@/routes/profile';
 import { show } from '@/routes/two-factor';
 import { edit as editPassword } from '@/routes/user-password';
+import { index as pedidosIndex } from '@/routes/pedidos';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
@@ -13,6 +14,11 @@ const sidebarNavItems: NavItem[] = [
     {
         title: 'Información',
         href: edit(),
+        icon: null,
+    },
+    {
+        title: 'Pedidos',
+        href: pedidosIndex(),
         icon: null,
     },
     {
@@ -78,7 +84,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                     <Separator className="lg:hidden" />
 
                     <div className="flex flex-1 justify-center">
-                        <section className="w-full max-w-2xl space-y-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+                        <section className="w-full max-w-4xl space-y-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
                             {children}
                         </section>
                     </div>

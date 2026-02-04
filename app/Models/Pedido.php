@@ -22,4 +22,5 @@ class Pedido extends Model
     {
         return $this->hasMany(PedidoProducto::class);
     }
+
 }
