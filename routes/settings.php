@@ -2,27 +2,26 @@
 
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
+use App\Http\Controllers\Settings\PedidosController;
 use App\Http\Controllers\Settings\TwoFactorAuthenticationController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::middleware('auth')->group(function () {
-    Route::redirect('settings', '/settings/profile');
+    Route::redirect('ajustes', '/ajustes/perfil');
+    Route::redirect('settings', '/ajustes/perfil');
 
-    Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('ajustes/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('ajustes/perfil', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('ajustes/perfil', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('settings/password', [PasswordController::class, 'edit'])->name('user-password.edit');
+    Route::get('ajustes/contrasena', [PasswordController::class, 'edit'])->name('user-password.edit');
 
-    Route::put('settings/password', [PasswordController::class, 'update'])
+    Route::put('ajustes/contrasena', [PasswordController::class, 'update'])
         ->middleware('throttle:6,1')
         ->name('user-password.update');
 
-    Route::get('settings/appearance', function () {
-        return Inertia::render('settings/appearance');
-    })->name('appearance.edit');
+    Route::get('ajustes/pedidos', [PedidosController::class, 'index'])->name('pedidos.index');
 
-    Route::get('settings/two-factor', [TwoFactorAuthenticationController::class, 'show'])
+    Route::get('ajustes/doble-factor', [TwoFactorAuthenticationController::class, 'show'])
         ->name('two-factor.show');
 });
