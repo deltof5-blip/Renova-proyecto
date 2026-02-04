@@ -10,34 +10,18 @@ import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
-import { Textarea } from "@/components/ui/textarea";
-
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-  SelectLabel,
-} from "@/components/ui/select";
-import { SelectGroup } from '@radix-ui/react-select';
-
 
 export default function Login({
     status,
     canResetPassword,
     canRegister,
-    valor,
-    setValor
-
-
 }) {
     return (
         <AuthLayout
-            title="Log in to your account"
-            description="Enter your email and password below to log in"
+            title="Inicia sesión"
+            description="Introduce tu correo y contraseña para acceder"
         >
-            <Head title="Log in" />
+            <Head title="Iniciar sesión" />
 
             <Form
                 {...store.form()}
@@ -48,7 +32,7 @@ export default function Login({
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">Correo electrónico</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -57,21 +41,21 @@ export default function Login({
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="email"
-                                    placeholder="email@example.com"
+                                    placeholder="correo@ejemplo.com"
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
                             <div className="grid gap-2">
                                 <div className="flex items-center">
-                                    <Label htmlFor="password">Password</Label>
+                                    <Label htmlFor="password">Contraseña</Label>
                                     {canResetPassword && (
                                         <TextLink
                                             href={request()}
                                             className="ml-auto text-sm"
                                             tabIndex={5}
                                         >
-                                            Forgot password?
+                                            ¿Olvidaste tu contraseña?
                                         </TextLink>
                                     )}
                                 </div>
@@ -82,7 +66,7 @@ export default function Login({
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"
-                                    placeholder="Password"
+                                    placeholder="Tu contraseña"
                                 />
                                 <InputError message={errors.password} />
                             </div>
@@ -93,7 +77,7 @@ export default function Login({
                                     name="remember"
                                     tabIndex={3}
                                 />
-                                <Label htmlFor="remember">Remember me</Label>
+                                <Label htmlFor="remember">Recuérdame</Label>
                             </div>
 
                             <Button
@@ -104,42 +88,15 @@ export default function Login({
                                 data-test="login-button"
                             >
                                 {processing && <Spinner />}
-                                Log in
+                                Entrar
                             </Button>
                         </div>
-                            <div className="w-72 p-8">
-      <Select value={valor} onValueChange={setValor}>
-        <SelectGroup>
-        <SelectLabel>Selecciona un dispositivo</SelectLabel>
-        <SelectTrigger>
-          <SelectValue placeholder="Elige una opción" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="iphone">iPhone</SelectItem>
-          <SelectItem value="samsung">Samsung</SelectItem>
-          <SelectItem value="xiaomi">Xiaomi</SelectItem>
-          <SelectItem value="otro">Otro</SelectItem>
-        </SelectContent>
-                </SelectGroup>
-
-      </Select>
-
-      <p className="mt-4 text-lg">
-        Valor seleccionado: <strong>{valor}</strong>
-      </p>
-
-            <Textarea
-        label="Descripción del problema"
-        placeholder="Escribe aquí los detalles..."
-        required
-      />
-    </div>
 
                         {canRegister && (
                             <div className="text-center text-sm text-muted-foreground">
-                                Don't have an account?{' '}
+                                ¿No tienes cuenta?{' '}
                                 <TextLink href={register()} tabIndex={5}>
-                                    Sign up
+                                    Regístrate
                                 </TextLink>
                             </div>
                         )}
