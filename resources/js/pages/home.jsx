@@ -20,21 +20,6 @@ export default function Welcome({ modelos = [] }) {
             </h1>
           }
           descripcion="Compra, repara o renueva con Renova tecnología confiable al mejor precio."
-          etiquetas={(
-            <>
-              {[
-                { title: "5G", label: "Ultra rápido" },
-                { title: "108 MP", label: "Cámara" },
-                { title: "+24H", label: "Batería" },
-              ].map((feature) => (
-                <Etiqueta
-                  key={feature.title}
-                  title={feature.title}
-                  label={feature.label}
-                />
-              ))}
-            </>
-          )}
           imagen={
             <img
               src="https://cdsassets.apple.com/live/7WUAS350/images/tech-specs/121031-iphone-16-pro.png"
@@ -43,23 +28,27 @@ export default function Welcome({ modelos = [] }) {
             />
           }
         >
-          <Button variant="default" className="rounded-full px-6">
-            Comprar Ahora
-          </Button>
-          <Button variant="outlineGray" className="rounded-full px-6">
-            Reparaciones
-          </Button>
-          {[
-            { title: "5G", label: "Ultra rápido" },
-            { title: "108 MP", label: "Cámara" },
-            { title: "+24H", label: "Batería" },
-          ].map((feature) => (
-            <Etiqueta
-              key={feature.title}
-              title={feature.title}
-              label={feature.label}
-            />
-          ))}
+          <div className="w-full flex flex-wrap gap-3">
+            <Button variant="default" className="rounded-full px-6">
+              Comprar Ahora
+            </Button>
+            <Button variant="outlineGray" className="rounded-full px-6">
+              Reparaciones
+            </Button>
+          </div>
+          <div className="w-full flex flex-wrap gap-3">
+            {[
+              { title: "5G", label: "Ultra rápido" },
+              { title: "108 MP", label: "Cámara" },
+              { title: "+24H", label: "Batería" },
+            ].map((feature) => (
+              <Etiqueta
+                key={feature.title}
+                title={feature.title}
+                label={feature.label}
+              />
+            ))}
+          </div>
         </Banner>
 
         <section className="mt-16">
