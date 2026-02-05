@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Models\Devolucion;
 use App\Models\Pedido;
 use App\Models\PedidoProducto;
 use Illuminate\Http\Request;
@@ -26,6 +27,7 @@ class PedidosController extends Controller
                     'estado' => $pedido->estado,
                     'total' => (float) $pedido->total,
                     'fecha' => $pedido->created_at?->format('d/m/Y H:i'),
+                    'created_at' => $pedido->created_at?->toIso8601String(),
                     'productos' => $pedido->productos->map(function ($producto) {
                         return [
                             'id' => $producto->id,
@@ -35,6 +37,13 @@ class PedidosController extends Controller
                             'datos' => $producto->datos,
                         ];
                     }),
+                    'devolucion' => $pedido->devolucion ? [
+                        'id' => $pedido->devolucion->id,
+                        'estado' => $pedido->devolucion->estado,
+                        'motivo' => $pedido->devolucion->motivo,
+                        'comentario' => $pedido->devolucion->comentario,
+                        'fecha' => $pedido->devolucion->created_at?->format('d/m/Y H:i'),
+                    ] : null,
                 ];
             });
 
@@ -112,6 +121,45 @@ class PedidosController extends Controller
         $pedido->save();
 
         return Inertia::location($session->url);
+    }
+
+    public function solicitarDevolucion(Request $request, Pedido $pedido)
+    {
+        $user = $request->user();
+        if (! $user || $pedido->user_id !== $user->id) {
+            return redirect()->route('login');
+        }
+
+        if ($pedido->estado !== 'pagado') {
+            return redirect()->route('pedidos.index')
+                ->with('error', 'Solo puedes solicitar devoluciones de pedidos pagados.');
+        }
+
+        if ($pedido->devolucion) {
+            return redirect()->route('pedidos.index')
+                ->with('error', 'Ya hay una devolución registrada para este pedido.');
+        }
+
+        if ($pedido->created_at && $pedido->created_at->lt(now()->subDays(14))) {
+            return redirect()->route('pedidos.index')
+                ->with('error', 'El plazo de devolución ha expirado.');
+        }
+
+        $datos = $request->validate([
+            'motivo' => ['required', 'string', 'max:100'],
+            'comentario' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        Devolucion::create([
+            'pedido_id' => $pedido->id,
+            'user_id' => $user->id,
+            'motivo' => $datos['motivo'],
+            'comentario' => $datos['comentario'] ?? null,
+            'estado' => 'pendiente',
+        ]);
+
+        return redirect()->route('pedidos.index')
+            ->with('success', 'Solicitud de devolución enviada.');
     }
 
     public function cancelar(Request $request, Pedido $pedido)

@@ -1,41 +1,38 @@
 import AppLayout from '@/layouts/renova-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { Button } from '@/components/ui/button';
-import { type BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import InputError from '@/components/input-error';
+import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import { Calendar, ChevronRight, Package } from 'lucide-react';
 
-type PedidoProducto = {
-    id: number;
-    nombre: string;
-    cantidad: number;
-    precio_unitario: number;
-    datos: {
-        color?: string;
-        grado?: string;
-        almacenamiento?: number;
-    } | null;
-};
-
-type Pedido = {
-    id: number;
-    estado: string;
-    total: number;
-    fecha: string | null;
-    productos: PedidoProducto[];
-};
-
-const breadcrumbs: BreadcrumbItem[] = [
+const breadcrumbs = [
     {
         title: 'Pedidos',
         href: '/ajustes/pedidos',
     },
 ];
 
-export default function Orders({ pedidos }: { pedidos: Pedido[] }) {
-    const [pedidosAbiertos, setPedidosAbiertos] = useState<Record<number, boolean>>({});
-    const estadoClasses = (estado: string) => {
+export default function Orders({ pedidos }) {
+    const [pedidosAbiertos, setPedidosAbiertos] = useState({});
+    const [modalDevolucionAbierto, setModalDevolucionAbierto] = useState(false);
+    const [pedidoDevolucion, setPedidoDevolucion] = useState(null);
+    const {
+        data: formDevolucion,
+        setData: setFormDevolucion,
+        post: enviarDevolucion,
+        processing: enviandoDevolucion,
+        errors: erroresDevolucion,
+        reset: resetDevolucion,
+        clearErrors,
+    } = useForm({
+        motivo: '',
+        comentario: '',
+    });
+    const estadoClasses = (estado) => {
         const base = 'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold';
         if (estado === 'pagado') {
             return `${base} bg-emerald-50 text-emerald-700`;
@@ -49,13 +46,125 @@ export default function Orders({ pedidos }: { pedidos: Pedido[] }) {
         return `${base} bg-slate-100 text-slate-700`;
     };
 
-    const formatoTotal = (total: number) => total.toFixed(2);
+    const formatoTotal = (total) => total.toFixed(2);
+
+    const abrirModalDevolucion = (pedido) => {
+        setPedidoDevolucion(pedido);
+        setFormDevolucion({
+            motivo: '',
+            comentario: '',
+        });
+        clearErrors();
+        setModalDevolucionAbierto(true);
+    };
+
+    const cerrarModalDevolucion = () => {
+        setModalDevolucionAbierto(false);
+        setPedidoDevolucion(null);
+        resetDevolucion();
+    };
+
+    const puedeSolicitarDevolucion = (pedido) => {
+        if (pedido.estado !== 'pagado' || pedido.devolucion) {
+            return false;
+        }
+        if (!pedido.created_at) {
+            return false;
+        }
+        const limite =
+            new Date(pedido.created_at).getTime() + 14 * 24 * 60 * 60 * 1000;
+        return Date.now() <= limite;
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Pedidos" />
 
             <SettingsLayout>
+                <Dialog
+                    open={modalDevolucionAbierto}
+                    onOpenChange={(abierto) =>
+                        abierto ? setModalDevolucionAbierto(true) : cerrarModalDevolucion()
+                    }
+                >
+                    <DialogContent className="max-w-xl">
+                        <DialogHeader>
+                            <DialogTitle>Solicitar devolución</DialogTitle>
+                        </DialogHeader>
+                        <div className="grid gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="motivo">Motivo</Label>
+                                <select
+                                    id="motivo"
+                                    className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm"
+                                    value={formDevolucion.motivo}
+                                    onChange={(e) =>
+                                        setFormDevolucion('motivo', e.target.value)
+                                    }
+                                >
+                                    <option value="">Selecciona un motivo</option>
+                                    <option value="No cumple mis expectativas">
+                                        No cumple mis expectativas
+                                    </option>
+                                    <option value="Me he arrepentido de la compra">
+                                        Me he arrepentido de la compra
+                                    </option>
+                                    <option value="Producto defectuoso">
+                                        Producto defectuoso
+                                    </option>
+                                    <option value="Otro motivo">
+                                        Otro motivo
+                                    </option>
+                                </select>
+                                <InputError message={erroresDevolucion.motivo} />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="comentario">Comentario (opcional)</Label>
+                                <Textarea
+                                    id="comentario"
+                                    value={formDevolucion.comentario}
+                                    onChange={(e) =>
+                                        setFormDevolucion('comentario', e.target.value)
+                                    }
+                                    placeholder="Cuéntanos más detalles"
+                                />
+                                <InputError message={erroresDevolucion.comentario} />
+                            </div>
+                            <p className="text-xs text-slate-500">
+                                Se rechazarán productos con signos de uso, manipulados o bajo criterio de la empresa.
+                            </p>
+                            <div className="flex justify-end gap-2">
+                                <Button
+                                    type="button"
+                                    variant="outlineGray"
+                                    size="sm"
+                                    onClick={cerrarModalDevolucion}
+                                >
+                                    Cancelar
+                                </Button>
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    disabled={!pedidoDevolucion || enviandoDevolucion}
+                                    onClick={() => {
+                                        if (!pedidoDevolucion) {
+                                            return;
+                                        }
+                                        enviarDevolucion(
+                                            `/ajustes/pedidos/${pedidoDevolucion.id}/devolucion`,
+                                            {
+                                                onSuccess: cerrarModalDevolucion,
+                                            }
+                                        );
+                                    }}
+                                >
+                                    Enviar solicitud
+                                </Button>
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+
                 <div className="space-y-6">
                     <div className="rounded-2xl border border-slate-200 bg-white p-5">
                         <h3 className="text-lg font-semibold text-slate-900">
@@ -177,20 +286,45 @@ export default function Orders({ pedidos }: { pedidos: Pedido[] }) {
                                                     Cancelar pedido
                                                 </Button>
                                             ) : null}
+                                            {pedido.devolucion ? (
+                                                <span className="text-xs text-slate-500">
+                                                    Devolución: {pedido.devolucion.estado}
+                                                </span>
+                                            ) : null}
+                                            {pedido.estado === 'pagado' &&
+                                            !pedido.devolucion &&
+                                            pedido.created_at &&
+                                            new Date(pedido.created_at).getTime() + 14 * 24 * 60 * 60 * 1000 < Date.now() ? (
+                                                <span className="text-xs text-slate-500">
+                                                    El plazo de devolución ha terminado. Para tramitar garantía escribe a Renova@support.com
+                                                </span>
+                                            ) : null}
                                         </div>
-                                        {pedido.estado === 'pendiente' ? (
-                                            <Button
-                                                type="button"
-                                                size="sm"
-                                                onClick={() =>
-                                                    router.post(
-                                                        `/ajustes/pedidos/${pedido.id}/pagar`,
-                                                    )
-                                                }
-                                            >
-                                                Pagar pedido
-                                            </Button>
-                                        ) : null}
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            {puedeSolicitarDevolucion(pedido) ? (
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="outlineGray"
+                                                    onClick={() => abrirModalDevolucion(pedido)}
+                                                >
+                                                    Solicitar devolución
+                                                </Button>
+                                            ) : null}
+                                            {pedido.estado === 'pendiente' ? (
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        router.post(
+                                                            `/ajustes/pedidos/${pedido.id}/pagar`,
+                                                        )
+                                                    }
+                                                >
+                                                    Pagar pedido
+                                                </Button>
+                                            ) : null}
+                                        </div>
                                         {pedido.productos.length > 3 ? (
                                             <button
                                                 type="button"

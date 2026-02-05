@@ -13,6 +13,7 @@ use App\Http\Controllers\BuscarController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\DireccionController;
+use App\Http\Controllers\DevolucionController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/buscar', [BuscarController::class, 'index'])->name('buscar');
@@ -40,6 +41,14 @@ Route::resource('reparaciones', ReparacionController::class)
 
 Route::get('admin/reparaciones', [ReparacionController::class, 'admin'])
     ->name('reparaciones.admin');
+Route::get('admin/devoluciones', [DevolucionController::class, 'index'])
+    ->name('devoluciones.index');
+Route::post('admin/devoluciones/{devolucion}/aprobar', [DevolucionController::class, 'aprobar'])
+    ->name('devoluciones.aprobar');
+Route::post('admin/devoluciones/{devolucion}/rechazar', [DevolucionController::class, 'rechazar'])
+    ->name('devoluciones.rechazar');
+Route::post('admin/devoluciones/{devolucion}/reembolsar', [DevolucionController::class, 'reembolsar'])
+    ->name('devoluciones.reembolsar');
 
 Route::get('carrito', [CarritoController::class, 'index'])->name('carrito.index');
 Route::post('carrito/productos', [CarritoController::class, 'store'])->name('carrito.store');

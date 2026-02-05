@@ -30,4 +30,9 @@ class Pedido extends Model
         return $this->hasMany(PedidoProducto::class);
     }
 
+    public function devolucion()
+    {
+        return $this->hasOne(Devolucion::class);
+    }
+
 }
