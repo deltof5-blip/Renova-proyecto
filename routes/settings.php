@@ -22,6 +22,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('ajustes/pedidos', [PedidosController::class, 'index'])->name('pedidos.index');
     Route::post('ajustes/pedidos/{pedido}/pagar', [PedidosController::class, 'pagar'])->name('pedidos.pagar');
+    Route::get('ajustes/pedidos/{pedido}/factura', [PedidosController::class, 'factura'])->name('pedidos.factura');
     Route::post('ajustes/pedidos/{pedido}/devolucion', [PedidosController::class, 'solicitarDevolucion'])->name('pedidos.devolucion');
     Route::post('ajustes/pedidos/{pedido}/cancelar', [PedidosController::class, 'cancelar'])->name('pedidos.cancelar');
 

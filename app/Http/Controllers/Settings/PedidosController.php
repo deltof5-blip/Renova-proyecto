@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Stripe\Checkout\Session as StripeSession;
 use Stripe\Stripe;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PedidosController extends Controller
 {
@@ -121,6 +122,28 @@ class PedidosController extends Controller
         $pedido->save();
 
         return Inertia::location($session->url);
+    }
+
+    public function factura(Request $request, Pedido $pedido)
+    {
+        $user = $request->user();
+        if (! $user || $pedido->user_id !== $user->id) {
+            return redirect()->route('login');
+        }
+
+        if ($pedido->estado !== 'pagado') {
+            return redirect()->route('pedidos.index')
+                ->with('error', 'Solo puedes descargar facturas de pedidos pagados.');
+        }
+
+        $pedido->load('productos');
+
+        $pdf = Pdf::loadView('facturas/pedido', [
+            'pedido' => $pedido,
+            'productos' => $pedido->productos,
+        ]);
+
+        return $pdf->stream('factura-pedido-'.$pedido->id.'.pdf');
     }
 
     public function solicitarDevolucion(Request $request, Pedido $pedido)

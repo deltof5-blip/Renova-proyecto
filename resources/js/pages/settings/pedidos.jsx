@@ -286,6 +286,17 @@ export default function Orders({ pedidos }) {
                                                     Cancelar pedido
                                                 </Button>
                                             ) : null}
+                                            {pedido.estado === 'pagado' ? (
+                                                <a
+                                                    href={`/ajustes/pedidos/${pedido.id}/factura`}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                >
+                                                    <Button size="sm" variant="secondary">
+                                                        Descargar factura
+                                                    </Button>
+                                                </a>
+                                            ) : null}
                                             {pedido.devolucion ? (
                                                 <span className="text-xs text-slate-500">
                                                     Devolución: {pedido.devolucion.estado}
