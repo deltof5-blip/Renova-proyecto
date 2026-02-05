@@ -270,7 +270,7 @@ export default function Orders({ pedidos }) {
                                         ) : null}
                                     </div>
 
-                                    <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+                                    <div className="mt-4 grid items-center gap-4 md:grid-cols-[1fr_auto]">
                                         <div className="flex flex-wrap items-center gap-2">
                                             {pedido.estado === 'pendiente' ? (
                                                 <Button
@@ -299,8 +299,6 @@ export default function Orders({ pedidos }) {
                                                     El plazo de devolución ha terminado. Para tramitar garantía escribe a Renova@support.com
                                                 </span>
                                             ) : null}
-                                        </div>
-                                        <div className="flex flex-wrap items-center gap-2">
                                             {puedeSolicitarDevolucion(pedido) ? (
                                                 <Button
                                                     type="button"
@@ -325,21 +323,23 @@ export default function Orders({ pedidos }) {
                                                 </Button>
                                             ) : null}
                                         </div>
-                                        {pedido.productos.length > 3 ? (
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center gap-2 text-sm font-medium text-slate-600"
-                                                onClick={() =>
-                                                    setPedidosAbiertos((prev) => ({
-                                                        ...prev,
-                                                        [pedido.id]: !estaAbierto,
-                                                    }))
-                                                }
-                                            >
-                                                {estaAbierto ? 'Ver menos' : 'Ver pedido completo'}
-                                                <ChevronRight className="h-4 w-4" />
-                                            </button>
-                                        ) : null}
+                                        <div className="flex justify-end">
+                                            {pedido.productos.length > 3 ? (
+                                                <button
+                                                    type="button"
+                                                    className="inline-flex items-center gap-2 text-sm font-medium text-slate-600"
+                                                    onClick={() =>
+                                                        setPedidosAbiertos((prev) => ({
+                                                            ...prev,
+                                                            [pedido.id]: !estaAbierto,
+                                                        }))
+                                                    }
+                                                >
+                                                    {estaAbierto ? 'Ver menos' : 'Ver pedido completo'}
+                                                    <ChevronRight className="h-4 w-4" />
+                                                </button>
+                                            ) : null}
+                                        </div>
                                     </div>
                                 </div>
                                     );
