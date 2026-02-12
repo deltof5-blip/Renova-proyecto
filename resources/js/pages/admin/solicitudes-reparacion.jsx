@@ -13,6 +13,7 @@ export default function SolicitudesReparacionAdmin({ solicitudes, tecnicos = [],
   const esTecnico = usuarioActual?.rol === 'tecnico';
   const [solicitudModal, setSolicitudModal] = useState(null);
   const [abierto, setAbierto] = useState(false);
+  const [erroresFront, setErroresFront] = useState({});
   const { data, setData, post, processing, reset, errors, clearErrors } = useForm({
     importe_total: '',
     descripcion: '',
@@ -26,6 +27,7 @@ export default function SolicitudesReparacionAdmin({ solicitudes, tecnicos = [],
     setSolicitudModal(solicitud);
     reset();
     clearErrors();
+    setErroresFront({});
     setAbierto(true);
   };
 
@@ -34,11 +36,29 @@ export default function SolicitudesReparacionAdmin({ solicitudes, tecnicos = [],
     if (!solicitudModal) {
       return;
     }
+    const nuevosErrores = {};
+    const importe = Number(data.importe_total);
+    if (!data.importe_total || Number.isNaN(importe)) {
+      nuevosErrores.importe_total = 'El importe es obligatorio.';
+    } else if (importe <= 0) {
+      nuevosErrores.importe_total = 'El importe debe ser mayor que 0.';
+    }
+    if (!String(data.descripcion || '').trim()) {
+      nuevosErrores.descripcion = 'La descripción es obligatoria.';
+    } else if (String(data.descripcion).trim().length < 5) {
+      nuevosErrores.descripcion = 'La descripción debe tener al menos 5 caracteres.';
+    }
+    if (Object.keys(nuevosErrores).length > 0) {
+      setErroresFront(nuevosErrores);
+      return;
+    }
+    setErroresFront({});
     post(`/admin/solicitudes-reparacion/${solicitudModal.id}/presupuesto`, {
       preserveScroll: true,
       onSuccess: () => {
         setAbierto(false);
         setSolicitudModal(null);
+        setErroresFront({});
         reset();
       },
     });
@@ -265,14 +285,14 @@ export default function SolicitudesReparacionAdmin({ solicitudes, tecnicos = [],
               step="0.01"
               value={data.importe_total}
               onChange={(e) => setData('importe_total', e.target.value)}
-              error={errors.importe_total}
+              error={erroresFront.importe_total || errors.importe_total}
               required
             />
             <Textarea
               label="Descripción"
               value={data.descripcion}
               onChange={(e) => setData('descripcion', e.target.value)}
-              error={errors.descripcion}
+              error={erroresFront.descripcion || errors.descripcion}
               required
               className="min-h-28"
             />

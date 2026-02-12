@@ -13,6 +13,7 @@ export default function ReparacionModal({ direcciones = [] }) {
   const direccionPredeterminada = direcciones.find((d) => d.predeterminada) || direcciones[0];
   const [abierto, setAbierto] = useState(false);
   const [modalidad, setModalidad] = useState("envio");
+  const [erroresFront, setErroresFront] = useState({});
   const { data, setData, post, processing, errors, reset } = useForm({
     direccion_id: direccionPredeterminada?.id || "",
     modelo_dispositivo: "",
@@ -23,9 +24,39 @@ export default function ReparacionModal({ direcciones = [] }) {
 
   const enviar = (e) => {
     e.preventDefault();
+    const nuevosErrores = {};
+
+    if (!auth?.user) {
+      nuevosErrores.general = "Debes iniciar sesión para solicitar una reparación.";
+    }
+    if (direcciones.length === 0 || !data.direccion_id) {
+      nuevosErrores.direccion_id = "Selecciona una dirección válida.";
+    }
+    if (!String(data.modelo_dispositivo || "").trim()) {
+      nuevosErrores.modelo_dispositivo = "El modelo del dispositivo es obligatorio.";
+    } else if (String(data.modelo_dispositivo).trim().length < 3) {
+      nuevosErrores.modelo_dispositivo = "El modelo del dispositivo debe tener al menos 3 caracteres.";
+    }
+    if (!String(data.tipo_problema || "").trim()) {
+      nuevosErrores.tipo_problema = "Selecciona el tipo de problema.";
+    }
+    if (String(data.descripcion || "").length > 2000) {
+      nuevosErrores.descripcion = "La descripción no puede superar 2000 caracteres.";
+    }
+    if (!["envio", "recogida"].includes(String(data.modalidad || ""))) {
+      nuevosErrores.modalidad = "Selecciona una modalidad válida.";
+    }
+
+    if (Object.keys(nuevosErrores).length > 0) {
+      setErroresFront(nuevosErrores);
+      return;
+    }
+
+    setErroresFront({});
     post("/reparaciones/solicitudes", {
       onSuccess: () => {
         reset();
+        setErroresFront({});
         setModalidad("envio");
         setAbierto(false);
       },
@@ -48,6 +79,11 @@ export default function ReparacionModal({ direcciones = [] }) {
         </DialogHeader>
 
         <form className="mt-8 space-y-7" onSubmit={enviar}>
+          {erroresFront.general ? (
+            <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-600">
+              {erroresFront.general}
+            </p>
+          ) : null}
           <div className="space-y-4">
             <h3 className="text-xl font-medium text-slate-900">
               Dirección de recogida y contacto
@@ -86,8 +122,10 @@ export default function ReparacionModal({ direcciones = [] }) {
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.direccion_id ? (
-                  <p className="mt-1 text-sm font-semibold text-red-500">{errors.direccion_id}</p>
+                {(erroresFront.direccion_id || errors.direccion_id) ? (
+                  <p className="mt-1 text-sm font-semibold text-red-500">
+                    {erroresFront.direccion_id || errors.direccion_id}
+                  </p>
                 ) : null}
                 <p className="text-xs text-slate-500">
                   Puedes editar tus direcciones en tu perfil.
@@ -107,7 +145,7 @@ export default function ReparacionModal({ direcciones = [] }) {
                 placeholder="Marca y modelo exactos"
                 value={data.modelo_dispositivo}
                 onChange={(e) => setData("modelo_dispositivo", e.target.value)}
-                error={errors.modelo_dispositivo}
+                error={erroresFront.modelo_dispositivo || errors.modelo_dispositivo}
               />
               <div className="w-full">
                 <label className="mb-2 block text-base font-semibold text-slate-600">
@@ -131,8 +169,10 @@ export default function ReparacionModal({ direcciones = [] }) {
                     <SelectItem value="otros">Otras reparaciones</SelectItem>
                   </SelectContent>
                 </Select>
-                {errors.tipo_problema ? (
-                  <p className="mt-1 text-sm font-semibold text-red-500">{errors.tipo_problema}</p>
+                {(erroresFront.tipo_problema || errors.tipo_problema) ? (
+                  <p className="mt-1 text-sm font-semibold text-red-500">
+                    {erroresFront.tipo_problema || errors.tipo_problema}
+                  </p>
                 ) : null}
               </div>
             </div>
@@ -142,8 +182,13 @@ export default function ReparacionModal({ direcciones = [] }) {
               className="min-h-32"
               value={data.descripcion}
               onChange={(e) => setData("descripcion", e.target.value)}
-              error={errors.descripcion}
+              error={erroresFront.descripcion || errors.descripcion}
             />
+            {(erroresFront.modalidad || errors.modalidad) ? (
+              <p className="text-sm font-semibold text-red-500">
+                {erroresFront.modalidad || errors.modalidad}
+              </p>
+            ) : null}
           </div>
 
           <div className="space-y-5">

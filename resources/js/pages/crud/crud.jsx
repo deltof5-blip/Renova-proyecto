@@ -9,6 +9,7 @@ export default function Crud({ nombre_modelo, datos, columnas, campos, ObjetoEdi
   const { flash } = usePage().props;
   const [editando, setEditando] = useState(!!ObjetoEditando);
   const [mensaje, setMensaje] = useState(flash.success);
+  const [erroresFront, setErroresFront] = useState({});
   const { data: datosFormulario, setData, post, put, reset, errors } = useForm(ObjetoEditando || {});
 
   useEffect(() => {
@@ -23,14 +24,35 @@ export default function Crud({ nombre_modelo, datos, columnas, campos, ObjetoEdi
 
   const enviarFormulario = (e) => {
     e.preventDefault();
+    const nuevosErrores = {};
+    campos.forEach((camp) => {
+      if (camp.name === 'id') {
+        return;
+      }
+      if (camp.required === false) {
+        return;
+      }
+      if (camp.type === 'number') {
+        if (datosFormulario[camp.name] === '' || datosFormulario[camp.name] === null || datosFormulario[camp.name] === undefined) {
+          nuevosErrores[camp.name] = `El campo ${camp.label} es obligatorio.`;
+        }
+      } else if (!String(datosFormulario[camp.name] || '').trim()) {
+        nuevosErrores[camp.name] = `El campo ${camp.label} es obligatorio.`;
+      }
+    });
+    if (Object.keys(nuevosErrores).length > 0) {
+      setErroresFront(nuevosErrores);
+      return;
+    }
+    setErroresFront({});
 
     if (editando) {
       put(`/admin/${nombre_modelo}/${datosFormulario.id}`, {
-        onSuccess: () => { reset(); setEditando(false); },
+        onSuccess: () => { reset(); setEditando(false); setErroresFront({}); },
       });
     } else {
       post(`/admin/${nombre_modelo}`, {
-        onSuccess: () => { reset(); setEditando(false); },
+        onSuccess: () => { reset(); setEditando(false); setErroresFront({}); },
       });
     }
   };
@@ -38,11 +60,13 @@ export default function Crud({ nombre_modelo, datos, columnas, campos, ObjetoEdi
   const modoEditar = (item) => {
     setEditando(true);
     setData(item);
+    setErroresFront({});
   };
 
   const cancelarEdicion = () => {
     reset();
     setEditando(false);
+    setErroresFront({});
   };
 
   const eliminar = (id) => {
@@ -102,11 +126,11 @@ export default function Crud({ nombre_modelo, datos, columnas, campos, ObjetoEdi
                     type={camp.type || 'text'}
                     value={datosFormulario[camp.name] || ''}
                     onChange={actualizarCampo}
-                    error={errors[camp.name]}
+                    error={erroresFront[camp.name] || errors[camp.name]}
                   />
                 )}
-                {errors[camp.name] && camp.type === 'select' ? (
-                  <p className="text-sm text-red-500">{errors[camp.name]}</p>
+                {(erroresFront[camp.name] || errors[camp.name]) && camp.type === 'select' ? (
+                  <p className="text-sm text-red-500">{erroresFront[camp.name] || errors[camp.name]}</p>
                 ) : null}
               </div>
             ))}

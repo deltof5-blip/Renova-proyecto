@@ -18,6 +18,7 @@ export default function Carrito({ carrito, direcciones = [] }) {
   );
   const [modalDireccionAbierto, setModalDireccionAbierto] = useState(false);
   const [direccionEditando, setDireccionEditando] = useState(null);
+  const [erroresFrontDireccion, setErroresFrontDireccion] = useState({});
   const {
     data: formDireccion,
     setData: setFormDireccion,
@@ -59,10 +60,24 @@ export default function Carrito({ carrito, direcciones = [] }) {
       setFormDireccion("etiqueta", "Casa");
     }
     clearErrors();
+    setErroresFrontDireccion({});
     setModalDireccionAbierto(true);
   };
   const maxDirecciones = 3;
   const puedeCrearDireccion = direcciones.length < maxDirecciones;
+
+  const validarDireccion = () => {
+    const nuevosErrores = {};
+    if (!String(formDireccion.etiqueta || "").trim()) nuevosErrores.etiqueta = "La etiqueta es obligatoria.";
+    if (!String(formDireccion.nombre || "").trim()) nuevosErrores.nombre = "El nombre es obligatorio.";
+    if (!String(formDireccion.apellidos || "").trim()) nuevosErrores.apellidos = "Los apellidos son obligatorios.";
+    if (!/^\d{9}$/.test(String(formDireccion.telefono || ""))) nuevosErrores.telefono = "El teléfono debe tener 9 dígitos.";
+    if (!String(formDireccion.direccion || "").trim()) nuevosErrores.direccion = "La dirección es obligatoria.";
+    if (!String(formDireccion.ciudad || "").trim()) nuevosErrores.ciudad = "La ciudad es obligatoria.";
+    if (!String(formDireccion.provincia || "").trim()) nuevosErrores.provincia = "La provincia es obligatoria.";
+    if (!/^\d{5}$/.test(String(formDireccion.codigo_postal || ""))) nuevosErrores.codigo_postal = "El código postal debe tener 5 dígitos.";
+    return nuevosErrores;
+  };
 
   return (
     <AppLayout>
@@ -173,7 +188,7 @@ export default function Carrito({ carrito, direcciones = [] }) {
                       }
                       placeholder="Casa / Trabajo"
                     />
-                    <InputError message={erroresDireccion.etiqueta} />
+                    <InputError message={erroresFrontDireccion.etiqueta || erroresDireccion.etiqueta} />
                   </div>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <div className="grid gap-2">
@@ -185,7 +200,7 @@ export default function Carrito({ carrito, direcciones = [] }) {
                           setFormDireccion("nombre", e.target.value)
                         }
                       />
-                      <InputError message={erroresDireccion.nombre} />
+                      <InputError message={erroresFrontDireccion.nombre || erroresDireccion.nombre} />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="apellidos">Apellidos</Label>
@@ -196,7 +211,7 @@ export default function Carrito({ carrito, direcciones = [] }) {
                           setFormDireccion("apellidos", e.target.value)
                         }
                       />
-                      <InputError message={erroresDireccion.apellidos} />
+                      <InputError message={erroresFrontDireccion.apellidos || erroresDireccion.apellidos} />
                     </div>
                   </div>
                   <div className="grid gap-2">
@@ -212,7 +227,7 @@ export default function Carrito({ carrito, direcciones = [] }) {
                       maxLength={9}
                       placeholder="Ej: 600000000"
                     />
-                    <InputError message={erroresDireccion.telefono} />
+                    <InputError message={erroresFrontDireccion.telefono || erroresDireccion.telefono} />
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="direccion">Dirección</Label>
@@ -224,7 +239,7 @@ export default function Carrito({ carrito, direcciones = [] }) {
                       }
                       placeholder="Calle y número"
                     />
-                    <InputError message={erroresDireccion.direccion} />
+                    <InputError message={erroresFrontDireccion.direccion || erroresDireccion.direccion} />
                   </div>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <div className="grid gap-2">
@@ -236,7 +251,7 @@ export default function Carrito({ carrito, direcciones = [] }) {
                           setFormDireccion("ciudad", e.target.value)
                         }
                       />
-                      <InputError message={erroresDireccion.ciudad} />
+                      <InputError message={erroresFrontDireccion.ciudad || erroresDireccion.ciudad} />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="provincia">Provincia</Label>
@@ -247,7 +262,7 @@ export default function Carrito({ carrito, direcciones = [] }) {
                           setFormDireccion("provincia", e.target.value)
                         }
                       />
-                      <InputError message={erroresDireccion.provincia} />
+                      <InputError message={erroresFrontDireccion.provincia || erroresDireccion.provincia} />
                     </div>
                   </div>
                   <div className="grid gap-2">
@@ -263,7 +278,7 @@ export default function Carrito({ carrito, direcciones = [] }) {
                       maxLength={5}
                       placeholder="Ej: 41001"
                     />
-                    <InputError message={erroresDireccion.codigo_postal} />
+                    <InputError message={erroresFrontDireccion.codigo_postal || erroresDireccion.codigo_postal} />
                   </div>
                   <label className="flex items-center gap-2 text-sm text-slate-600">
                     <input
@@ -277,12 +292,19 @@ export default function Carrito({ carrito, direcciones = [] }) {
                   </label>
                   <Button
                     disabled={creandoDireccion}
-                    onClick={() =>
-                      (direccionEditando
+                    onClick={() => {
+                      const nuevosErrores = validarDireccion();
+                      if (Object.keys(nuevosErrores).length > 0) {
+                        setErroresFrontDireccion(nuevosErrores);
+                        return;
+                      }
+                      setErroresFrontDireccion({});
+                      return (direccionEditando
                         ? actualizarDireccion(`/direcciones/${direccionEditando}`, {
                             onSuccess: () => {
                               resetDireccion();
                               clearErrors();
+                              setErroresFrontDireccion({});
                               setDireccionEditando(null);
                               setModalDireccionAbierto(false);
                             },
@@ -291,10 +313,11 @@ export default function Carrito({ carrito, direcciones = [] }) {
                             onSuccess: () => {
                               resetDireccion();
                               clearErrors();
+                              setErroresFrontDireccion({});
                               setModalDireccionAbierto(false);
                             },
-                          }))
-                    }
+                          }));
+                    }}
                   >
                     {direccionEditando ? "Guardar cambios" : "Guardar dirección"}
                   </Button>

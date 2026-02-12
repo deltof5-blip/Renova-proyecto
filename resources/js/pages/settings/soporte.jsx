@@ -22,6 +22,8 @@ export default function SoporteUsuario({ tickets, categorias, ticketAbiertoInici
   const paginaAnterior = tickets?.prev_page_url;
   const paginaSiguiente = tickets?.next_page_url;
   const [respuestas, setRespuestas] = useState({});
+  const [erroresFront, setErroresFront] = useState({});
+  const [erroresRespuesta, setErroresRespuesta] = useState({});
   const [ticketAbiertoId, setTicketAbiertoId] = useState(null);
   const [modalNuevoTicketAbierto, setModalNuevoTicketAbierto] = useState(false);
   const { data, setData, post, processing, errors, reset } = useForm({
@@ -67,10 +69,30 @@ export default function SoporteUsuario({ tickets, categorias, ticketAbiertoInici
                 className="space-y-3"
                 onSubmit={(e) => {
                   e.preventDefault();
+                  const nuevosErrores = {};
+                  if (!String(data.asunto || '').trim()) {
+                    nuevosErrores.asunto = 'El asunto es obligatorio.';
+                  } else if (String(data.asunto).trim().length < 3) {
+                    nuevosErrores.asunto = 'El asunto debe tener al menos 3 caracteres.';
+                  }
+                  if (!String(data.categoria || '').trim()) {
+                    nuevosErrores.categoria = 'La categoría es obligatoria.';
+                  }
+                  if (!String(data.mensaje || '').trim()) {
+                    nuevosErrores.mensaje = 'El mensaje es obligatorio.';
+                  } else if (String(data.mensaje).trim().length < 5) {
+                    nuevosErrores.mensaje = 'El mensaje debe tener al menos 5 caracteres.';
+                  }
+                  if (Object.keys(nuevosErrores).length > 0) {
+                    setErroresFront(nuevosErrores);
+                    return;
+                  }
+                  setErroresFront({});
                   post('/ajustes/soporte', {
                     preserveScroll: true,
                     onSuccess: () => {
                       reset('asunto', 'mensaje');
+                      setErroresFront({});
                       setModalNuevoTicketAbierto(false);
                     },
                   });
@@ -80,7 +102,7 @@ export default function SoporteUsuario({ tickets, categorias, ticketAbiertoInici
                   label="Asunto"
                   value={data.asunto}
                   onChange={(e) => setData('asunto', e.target.value)}
-                  error={errors.asunto}
+                  error={erroresFront.asunto || errors.asunto}
                   required
                 />
                 <div>
@@ -94,13 +116,13 @@ export default function SoporteUsuario({ tickets, categorias, ticketAbiertoInici
                       <option key={categoria} value={categoria}>{categoria}</option>
                     ))}
                   </select>
-                  <InputError message={errors.categoria} />
+                  <InputError message={erroresFront.categoria || errors.categoria} />
                 </div>
                 <Textarea
                   label="Mensaje"
                   value={data.mensaje}
                   onChange={(e) => setData('mensaje', e.target.value)}
-                  error={errors.mensaje}
+                  error={erroresFront.mensaje || errors.mensaje}
                   required
                   className="min-h-24"
                 />
@@ -199,20 +221,39 @@ export default function SoporteUsuario({ tickets, categorias, ticketAbiertoInici
                             placeholder="Escribe tu mensaje..."
                             className="min-h-20"
                           />
+                          {erroresRespuesta[ticket.id] ? (
+                            <p className="text-sm font-semibold text-red-500">{erroresRespuesta[ticket.id]}</p>
+                          ) : null}
                           <div className="flex flex-wrap gap-2">
                             <Button
                               size="sm"
-                              onClick={() =>
+                              onClick={() => {
+                                const mensaje = String(respuestas[ticket.id] || '').trim();
+                                if (!mensaje) {
+                                  setErroresRespuesta((prev) => ({
+                                    ...prev,
+                                    [ticket.id]: 'Escribe un mensaje antes de enviarlo.',
+                                  }));
+                                  return;
+                                }
+                                if (mensaje.length < 3) {
+                                  setErroresRespuesta((prev) => ({
+                                    ...prev,
+                                    [ticket.id]: 'El mensaje debe tener al menos 3 caracteres.',
+                                  }));
+                                  return;
+                                }
+                                setErroresRespuesta((prev) => ({ ...prev, [ticket.id]: null }));
                                 router.post(
                                   `/ajustes/soporte/${ticket.id}/responder`,
-                                  { mensaje: respuestas[ticket.id] || '' },
+                                  { mensaje },
                                   {
                                     preserveScroll: true,
                                     onSuccess: () =>
                                       setRespuestas((prev) => ({ ...prev, [ticket.id]: '' })),
                                   },
-                                )
-                              }
+                                );
+                              }}
                             >
                               Enviar mensaje
                             </Button>

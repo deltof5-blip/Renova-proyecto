@@ -21,6 +21,7 @@ export default function Orders({ pedidos }) {
     const [modalDevolucionAbierto, setModalDevolucionAbierto] = useState(false);
     const [pedidoDevolucion, setPedidoDevolucion] = useState(null);
     const [pedidoAyuda, setPedidoAyuda] = useState(null);
+    const [erroresFrontDevolucion, setErroresFrontDevolucion] = useState({});
     const {
         data: formDevolucion,
         setData: setFormDevolucion,
@@ -67,6 +68,7 @@ export default function Orders({ pedidos }) {
             comentario: '',
         });
         clearErrors();
+        setErroresFrontDevolucion({});
         setModalDevolucionAbierto(true);
     };
 
@@ -74,6 +76,7 @@ export default function Orders({ pedidos }) {
         setModalDevolucionAbierto(false);
         setPedidoDevolucion(null);
         resetDevolucion();
+        setErroresFrontDevolucion({});
     };
 
     const puedeSolicitarDevolucion = (pedido) => {
@@ -128,7 +131,7 @@ export default function Orders({ pedidos }) {
                                         Otro motivo
                                     </option>
                                 </select>
-                                <InputError message={erroresDevolucion.motivo} />
+                                <InputError message={erroresFrontDevolucion.motivo || erroresDevolucion.motivo} />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="comentario">Comentario (opcional)</Label>
@@ -140,7 +143,7 @@ export default function Orders({ pedidos }) {
                                     }
                                     placeholder="Cuéntanos más detalles"
                                 />
-                                <InputError message={erroresDevolucion.comentario} />
+                                <InputError message={erroresFrontDevolucion.comentario || erroresDevolucion.comentario} />
                             </div>
                             <p className="text-xs text-slate-500">
                                 Se rechazarán productos con signos de uso, manipulados o bajo criterio de la empresa.
@@ -162,6 +165,18 @@ export default function Orders({ pedidos }) {
                                         if (!pedidoDevolucion) {
                                             return;
                                         }
+                                        const nuevosErrores = {};
+                                        if (!String(formDevolucion.motivo || '').trim()) {
+                                            nuevosErrores.motivo = 'Selecciona un motivo.';
+                                        }
+                                        if (String(formDevolucion.comentario || '').length > 1000) {
+                                            nuevosErrores.comentario = 'El comentario no puede superar 1000 caracteres.';
+                                        }
+                                        if (Object.keys(nuevosErrores).length > 0) {
+                                            setErroresFrontDevolucion(nuevosErrores);
+                                            return;
+                                        }
+                                        setErroresFrontDevolucion({});
                                         enviarDevolucion(
                                             `/ajustes/pedidos/${pedidoDevolucion.id}/devolucion`,
                                             {
