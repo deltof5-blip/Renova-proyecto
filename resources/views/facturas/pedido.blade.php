@@ -32,6 +32,7 @@
     <div class="box">
         <strong>Datos de envío</strong><br>
         {{ $pedido->nombre }} {{ $pedido->apellidos }}<br>
+        DNI: {{ $pedido->dni ?: '-' }}<br>
         {{ $pedido->direccion }}<br>
         {{ $pedido->codigo_postal }} {{ $pedido->ciudad }} ({{ $pedido->provincia }})<br>
         Tel: {{ $pedido->telefono }}

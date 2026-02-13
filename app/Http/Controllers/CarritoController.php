@@ -169,6 +169,13 @@ class CarritoController extends Controller
             'cantidad' => 'required|integer|min:1',
         ]);
 
+        if (! $productoCarrito->producto) {
+            $productoCarrito->delete();
+
+            return redirect()->route('carrito.index')
+                ->with('error', 'El producto ya no existe y se ha eliminado del carrito.');
+        }
+
         $stockDisponible = $productoCarrito->producto->stock !== null ? $productoCarrito->producto->stock : 0;
         if ($data['cantidad'] > $stockDisponible) {
             throw ValidationException::withMessages([
@@ -302,6 +309,7 @@ class CarritoController extends Controller
             'total' => round($total, 2),
             'nombre' => $direccion->nombre,
             'apellidos' => $direccion->apellidos,
+            'dni' => $direccion->dni,
             'telefono' => $direccion->telefono,
             'direccion' => $direccion->direccion,
             'ciudad' => $direccion->ciudad,

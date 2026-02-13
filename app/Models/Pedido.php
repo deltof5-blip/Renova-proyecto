@@ -17,6 +17,7 @@ class Pedido extends Model
         'stripe_sesion_id',
         'nombre',
         'apellidos',
+        'dni',
         'telefono',
         'direccion',
         'ciudad',
