@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             UsuariosBaseSeeder::class,
             MarcasBaseSeeder::class,
             ModelosBaseSeeder::class,
+            MovilSeeder::class,
             CategoriaSeeder::class,
             ComponenteSeeder::class,
         ]);

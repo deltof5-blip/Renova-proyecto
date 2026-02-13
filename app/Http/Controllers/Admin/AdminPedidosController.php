@@ -66,6 +66,7 @@ class AdminPedidosController extends Controller
                     'direccion' => [
                         'nombre' => $pedido->nombre,
                         'apellidos' => $pedido->apellidos,
+                        'dni' => $pedido->dni,
                         'telefono' => $pedido->telefono,
                         'direccion' => $pedido->direccion,
                         'ciudad' => $pedido->ciudad,

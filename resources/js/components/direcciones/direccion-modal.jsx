@@ -100,119 +100,127 @@ export default function DireccionModal({ abierto, onAbiertoChange, direccion = n
 
   return (
     <Dialog open={abierto} onOpenChange={onAbiertoChange}>
-      <DialogContent className="max-w-xl">
-        <DialogHeader>
-          <DialogTitle>{direccion?.id ? "Editar dirección" : "Nueva dirección"}</DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="etiqueta">Etiqueta</Label>
-            <Input
-              id="etiqueta"
-              value={formDireccion.etiqueta}
-              onChange={(e) => setFormDireccion("etiqueta", e.target.value)}
-              placeholder="Casa / Trabajo"
-            />
-            <InputError message={errores.etiqueta || erroresBackendDireccion.etiqueta} />
-          </div>
-          <div className="grid gap-2 sm:grid-cols-2">
-            <div className="grid gap-2">
-              <Label htmlFor="nombre">Nombre</Label>
-              <Input
-                id="nombre"
-                value={formDireccion.nombre}
-                onChange={(e) => setFormDireccion("nombre", e.target.value)}
-              />
-              <InputError message={errores.nombre || erroresBackendDireccion.nombre} />
+      <DialogContent className="max-h-[90vh] max-w-xl overflow-hidden p-0">
+        <div className="flex h-full max-h-[90vh] flex-col">
+          <DialogHeader className="border-b px-6 py-4">
+            <DialogTitle>{direccion?.id ? "Editar dirección" : "Nueva dirección"}</DialogTitle>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto px-6 py-4">
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="etiqueta">Etiqueta</Label>
+                <Input
+                  id="etiqueta"
+                  value={formDireccion.etiqueta}
+                  onChange={(e) => setFormDireccion("etiqueta", e.target.value)}
+                  placeholder="Casa / Trabajo"
+                />
+                <InputError message={errores.etiqueta || erroresBackendDireccion.etiqueta} />
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="nombre">Nombre</Label>
+                  <Input
+                    id="nombre"
+                    value={formDireccion.nombre}
+                    onChange={(e) => setFormDireccion("nombre", e.target.value)}
+                  />
+                  <InputError message={errores.nombre || erroresBackendDireccion.nombre} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="apellidos">Apellidos</Label>
+                  <Input
+                    id="apellidos"
+                    value={formDireccion.apellidos}
+                    onChange={(e) => setFormDireccion("apellidos", e.target.value)}
+                  />
+                  <InputError message={errores.apellidos || erroresBackendDireccion.apellidos} />
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="dni">DNI</Label>
+                <Input
+                  id="dni"
+                  value={formDireccion.dni}
+                  onChange={(e) => setFormDireccion("dni", e.target.value.toUpperCase())}
+                  maxLength={9}
+                  placeholder="Ej: 12345678Z"
+                />
+                <InputError message={errores.dni || erroresBackendDireccion.dni} />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="telefono">Teléfono</Label>
+                <Input
+                  id="telefono"
+                  value={formDireccion.telefono}
+                  onChange={(e) => setFormDireccion("telefono", e.target.value)}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={9}
+                  placeholder="Ej: 600000000"
+                />
+                <InputError message={errores.telefono || erroresBackendDireccion.telefono} />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="direccion">Dirección</Label>
+                <Input
+                  id="direccion"
+                  value={formDireccion.direccion}
+                  onChange={(e) => setFormDireccion("direccion", e.target.value)}
+                  placeholder="Calle y número"
+                />
+                <InputError message={errores.direccion || erroresBackendDireccion.direccion} />
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="ciudad">Ciudad</Label>
+                  <Input
+                    id="ciudad"
+                    value={formDireccion.ciudad}
+                    onChange={(e) => setFormDireccion("ciudad", e.target.value)}
+                  />
+                  <InputError message={errores.ciudad || erroresBackendDireccion.ciudad} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="provincia">Provincia</Label>
+                  <Input
+                    id="provincia"
+                    value={formDireccion.provincia}
+                    onChange={(e) => setFormDireccion("provincia", e.target.value)}
+                  />
+                  <InputError message={errores.provincia || erroresBackendDireccion.provincia} />
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="codigo_postal">Código postal</Label>
+                <Input
+                  id="codigo_postal"
+                  value={formDireccion.codigo_postal}
+                  onChange={(e) => setFormDireccion("codigo_postal", e.target.value)}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={5}
+                  placeholder="Ej: 41001"
+                />
+                <InputError message={errores.codigo_postal || erroresBackendDireccion.codigo_postal} />
+              </div>
+              <label className="flex items-center gap-2 text-sm text-slate-600">
+                <input
+                  type="checkbox"
+                  checked={formDireccion.predeterminada}
+                  onChange={(e) => setFormDireccion("predeterminada", e.target.checked)}
+                />
+                Marcar como predeterminada
+              </label>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="apellidos">Apellidos</Label>
-              <Input
-                id="apellidos"
-                value={formDireccion.apellidos}
-                onChange={(e) => setFormDireccion("apellidos", e.target.value)}
-              />
-              <InputError message={errores.apellidos || erroresBackendDireccion.apellidos} />
-            </div>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="dni">DNI</Label>
-            <Input
-              id="dni"
-              value={formDireccion.dni}
-              onChange={(e) => setFormDireccion("dni", e.target.value.toUpperCase())}
-              maxLength={9}
-              placeholder="Ej: 12345678Z"
-            />
-            <InputError message={errores.dni || erroresBackendDireccion.dni} />
+
+          <div className="border-t bg-white px-6 py-4">
+            <Button className="w-full" disabled={creandoDireccion} onClick={guardar}>
+              {direccion?.id ? "Guardar cambios" : "Guardar dirección"}
+            </Button>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="telefono">Teléfono</Label>
-            <Input
-              id="telefono"
-              value={formDireccion.telefono}
-              onChange={(e) => setFormDireccion("telefono", e.target.value)}
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={9}
-              placeholder="Ej: 600000000"
-            />
-            <InputError message={errores.telefono || erroresBackendDireccion.telefono} />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="direccion">Dirección</Label>
-            <Input
-              id="direccion"
-              value={formDireccion.direccion}
-              onChange={(e) => setFormDireccion("direccion", e.target.value)}
-              placeholder="Calle y número"
-            />
-            <InputError message={errores.direccion || erroresBackendDireccion.direccion} />
-          </div>
-          <div className="grid gap-2 sm:grid-cols-2">
-            <div className="grid gap-2">
-              <Label htmlFor="ciudad">Ciudad</Label>
-              <Input
-                id="ciudad"
-                value={formDireccion.ciudad}
-                onChange={(e) => setFormDireccion("ciudad", e.target.value)}
-              />
-              <InputError message={errores.ciudad || erroresBackendDireccion.ciudad} />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="provincia">Provincia</Label>
-              <Input
-                id="provincia"
-                value={formDireccion.provincia}
-                onChange={(e) => setFormDireccion("provincia", e.target.value)}
-              />
-              <InputError message={errores.provincia || erroresBackendDireccion.provincia} />
-            </div>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="codigo_postal">Código postal</Label>
-            <Input
-              id="codigo_postal"
-              value={formDireccion.codigo_postal}
-              onChange={(e) => setFormDireccion("codigo_postal", e.target.value)}
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={5}
-              placeholder="Ej: 41001"
-            />
-            <InputError message={errores.codigo_postal || erroresBackendDireccion.codigo_postal} />
-          </div>
-          <label className="flex items-center gap-2 text-sm text-slate-600">
-            <input
-              type="checkbox"
-              checked={formDireccion.predeterminada}
-              onChange={(e) => setFormDireccion("predeterminada", e.target.checked)}
-            />
-            Marcar como predeterminada
-          </label>
-          <Button disabled={creandoDireccion} onClick={guardar}>
-            {direccion?.id ? "Guardar cambios" : "Guardar dirección"}
-          </Button>
         </div>
       </DialogContent>
     </Dialog>
