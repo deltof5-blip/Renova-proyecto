@@ -86,7 +86,6 @@ export default function AdminContabilidad({ resumen, series, rango, anio, anios 
         <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
-              <Button size="sm" variant={rango === 'hoy' ? 'secondary' : 'outlineGray'} onClick={() => cambiarRango('hoy')}>Hoy</Button>
               <Button
                 size="sm"
                 disabled={soloRangoAnual}
