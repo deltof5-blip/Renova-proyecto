@@ -5,6 +5,13 @@ import { MRT_Localization_ES } from 'material-react-table/locales/es';
 export function Tabla({ columns, data, pageSize = 5 }) {
   const columnasSeguras = Array.isArray(columns) ? columns : [];
   const filasSeguras = Array.isArray(data) ? data : [];
+  const tieneColumnaId = columnasSeguras.some(
+    (columna) => columna?.accessorKey === 'id' || columna?.id === 'id'
+  );
+  const primeraColumna = columnasSeguras.find((columna) => columna?.accessorKey || columna?.id);
+  const columnaOrdenInicial = tieneColumnaId
+    ? 'id'
+    : (primeraColumna?.accessorKey || primeraColumna?.id || null);
 
   return (
     <div className="p-2 md:p-4">
@@ -16,6 +23,7 @@ export function Tabla({ columns, data, pageSize = 5 }) {
         enablePagination
         initialState={{
           pagination: { pageSize },
+          sorting: columnaOrdenInicial ? [{ id: columnaOrdenInicial, desc: false }] : [],
         }}
         muiTableContainerProps={{
           sx: {
