@@ -4,7 +4,6 @@ import AppLayout from '@/layouts/renova-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabla } from '@/components/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export default function Crud({ nombre_ruta, datos, columnas, campos }) {
@@ -128,31 +127,6 @@ export default function Crud({ nombre_ruta, datos, columnas, campos }) {
       },
     });
   };
-
-  const columnasTabla = [
-    ...columnas.map((columna) => ({
-      accessorKey: columna,
-      header: columna,
-    })),
-    {
-      id: 'acciones',
-      header: 'Acciones',
-      enableSorting: false,
-      Cell: ({ row }) => {
-        const objeto = row.original;
-        return (
-          <div className="flex flex-wrap justify-center gap-2">
-            <Button size="sm" variant="outlineGray" onClick={() => modoEditar(objeto)}>
-              Editar
-            </Button>
-            <Button size="sm" variant="delete" onClick={() => abrirModalEliminar(objeto.id)}>
-              Eliminar
-            </Button>
-          </div>
-        );
-      },
-    },
-  ];
 
   return (
     <AppLayout>
@@ -300,7 +274,37 @@ export default function Crud({ nombre_ruta, datos, columnas, campos }) {
         </div>
 
         <div className="mx-auto max-w-4xl overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <Tabla columns={columnasTabla} data={datos || []} pageSize={8} />
+          <table className="w-full text-sm">
+            <thead className="bg-slate-50 text-center text-xs font-semibold uppercase text-slate-500">
+              <tr>
+                {columnas.map((col) => (
+                  <th key={col} className="px-4 py-3">{col}</th>
+                ))}
+                <th className="px-4 py-3">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {datos.map((objeto) => (
+                <tr key={objeto.id} className="hover:bg-slate-50 text-center">
+                  {columnas.map((col) => (
+                    <td key={col} className="px-4 py-3 text-slate-700">
+                      {objeto[col]}
+                    </td>
+                  ))}
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap justify-center gap-2">
+                      <Button size="sm" variant="outlineGray" onClick={() => modoEditar(objeto)}>
+                        Editar
+                      </Button>
+                      <Button size="sm" variant="delete" onClick={() => abrirModalEliminar(objeto.id)}>
+                        Eliminar
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
