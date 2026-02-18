@@ -32,7 +32,7 @@ class PresupuestoController extends Controller
         }
 
         $datos = $request->validate([
-            'importe_total' => ['required', 'numeric', 'min:0'],
+            'importe_total' => ['required', 'numeric', 'min:0', 'max:999999'],
             'descripcion' => ['required', 'string', 'max:2500'],
         ]);
 

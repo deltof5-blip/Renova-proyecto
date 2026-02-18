@@ -16,6 +16,8 @@ use Stripe\Stripe;
 
 class SolicitudReparacionController extends Controller
 {
+    private const IMPORTE_REVISION_EUR = 30.0;
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -475,6 +477,27 @@ class SolicitudReparacionController extends Controller
             return back()->with('error', 'No hay un presupuesto pendiente para aceptar.');
         }
 
+        $importeFinal = $this->importeFinalPresupuesto((float) $presupuesto->importe_total);
+        if ($importeFinal <= 0) {
+            $presupuesto->estado = 'aceptado';
+            $presupuesto->save();
+
+            $solicitudReparacion->estado = 'aceptada';
+            $solicitudReparacion->save();
+
+            $user->notify(new NotificacionClase(
+                'Presupuesto aceptado',
+                'Tu solicitud #'.$solicitudReparacion->id.' ha quedado aceptada. No tienes que pagar importe adicional.',
+                '/ajustes/reparaciones'
+            ));
+
+            return back()->with('success', 'Presupuesto aceptado. No hay pago adicional porque el importe ya queda cubierto con la revisión.');
+        }
+
+        if ($importeFinal > 999999) {
+            return back()->with('error', 'El importe final supera el máximo permitido para pago online.');
+        }
+
         $secret = config('services.stripe.secret');
         if (! $secret) {
             return back()->with('error', 'Stripe no está configurado.');
@@ -492,7 +515,7 @@ class SolicitudReparacionController extends Controller
                         'name' => 'Presupuesto reparación',
                         'description' => 'Solicitud #' . $solicitudReparacion->id,
                     ],
-                    'unit_amount' => (int) round(((float) $presupuesto->importe_total) * 100),
+                    'unit_amount' => (int) round($importeFinal * 100),
                 ],
                 'quantity' => 1,
             ]],
@@ -640,5 +663,16 @@ class SolicitudReparacionController extends Controller
 
         return redirect('/ajustes/soporte?ticket='.$ticket->id)
             ->with('success', 'Ticket de ayuda listo.');
+    }
+
+    private function importeFinalPresupuesto(float $importeTotal): float
+    {
+        $importeFinal = $importeTotal - self::IMPORTE_REVISION_EUR;
+
+        if ($importeFinal <= 0) {
+            return 0.0;
+        }
+
+        return round($importeFinal, 2);
     }
 }

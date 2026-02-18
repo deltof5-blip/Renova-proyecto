@@ -436,6 +436,10 @@ class CarritoController extends Controller
                     ProductoCarrito::where('user_id', $user->id)->delete();
                 });
             } catch (ValidationException $e) {
+                $pedido->estado = 'cancelado';
+                $pedido->estado_envio = 'cancelado';
+                $pedido->save();
+
                 $errores = $e->errors();
                 $mensaje = 'No se pudo confirmar el pedido.';
                 if (! empty($errores)) {

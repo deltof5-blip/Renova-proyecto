@@ -108,6 +108,7 @@ class DevolucionController extends Controller
         $devolucion->save();
 
         $pedido->estado = 'cancelado';
+        $pedido->estado_envio = 'cancelado';
         $pedido->save();
 
         if ($devolucion->user) {

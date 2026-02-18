@@ -42,6 +42,8 @@ export default function SolicitudesReparacionAdmin({ solicitudes, tecnicos = [],
       nuevosErrores.importe_total = 'El importe es obligatorio.';
     } else if (importe <= 0) {
       nuevosErrores.importe_total = 'El importe debe ser mayor que 0.';
+    } else if (importe > 999999) {
+      nuevosErrores.importe_total = 'El importe máximo permitido es 999999 €.';
     }
     if (!String(data.descripcion || '').trim()) {
       nuevosErrores.descripcion = 'La descripción es obligatoria.';
@@ -214,34 +216,19 @@ export default function SolicitudesReparacionAdmin({ solicitudes, tecnicos = [],
 
                 {solicitud.estado === 'rechazada' && (esAdmin || (esTecnico && solicitud.tecnico_id === usuarioActual?.id)) ? (
                   <div className="mt-4">
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        variant="outlineGray"
-                        size="sm"
-                        onClick={() =>
-                          router.post(
-                            `/admin/solicitudes-reparacion/${solicitud.id}/devolver`,
-                            {},
-                            { preserveScroll: true }
-                          )
-                        }
-                      >
-                        Devolver dispositivo
-                      </Button>
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() =>
-                          router.post(
-                            `/admin/solicitudes-reparacion/${solicitud.id}/enviar`,
-                            {},
-                            { preserveScroll: true }
-                          )
-                        }
-                      >
-                        Marcar como enviado
-                      </Button>
-                    </div>
+                    <Button
+                      variant="outlineGray"
+                      size="sm"
+                      onClick={() =>
+                        router.post(
+                          `/admin/solicitudes-reparacion/${solicitud.id}/devolver`,
+                          {},
+                          { preserveScroll: true }
+                        )
+                      }
+                    >
+                      Devolver dispositivo
+                    </Button>
                   </div>
                 ) : null}
 

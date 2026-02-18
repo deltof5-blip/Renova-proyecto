@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
             ModelosBaseSeeder::class,
             MovilSeeder::class,
             CategoriaSeeder::class,
-            ComponenteSeeder::class,
+            ComponentesSeeder::class,
         ]);
     }
 }

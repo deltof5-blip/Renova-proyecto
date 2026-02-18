@@ -242,6 +242,7 @@ class PedidosController extends Controller
         }
 
         $pedido->estado = 'cancelado';
+        $pedido->estado_envio = 'cancelado';
         $pedido->save();
 
         return redirect()->route('pedidos.index')

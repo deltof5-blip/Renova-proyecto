@@ -8,7 +8,7 @@ use App\Models\Modelo;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
-class ComponenteSeeder extends Seeder
+class ComponentesSeeder extends Seeder
 {
     public function run(): void
     {
@@ -90,3 +90,4 @@ class ComponenteSeeder extends Seeder
         return $fotos;
     }
 }
+
