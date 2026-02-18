@@ -18,6 +18,12 @@ class ContabilidadController extends Controller
     {
         $rango = $request->query('rango', 'mes');
         $anio = $request->query('anio');
+        $anioActual = (int) Carbon::now()->format('Y');
+        $anioSeleccionado = $anio ? (int) $anio : null;
+
+        if ($anioSeleccionado && $anioSeleccionado !== $anioActual) {
+            $rango = 'anio';
+        }
 
         [$inicio, $fin] = $this->resolverRango($rango, $anio);
 

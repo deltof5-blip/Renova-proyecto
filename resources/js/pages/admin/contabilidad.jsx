@@ -15,6 +15,9 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 export default function AdminContabilidad({ resumen, series, rango, anio, anios }) {
   const formato = (valor) => Number(valor || 0).toFixed(2);
+  const anioActual = new Date().getFullYear();
+  const anioSeleccionado = anio ? Number(anio) : null;
+  const soloRangoAnual = Boolean(anioSeleccionado && anioSeleccionado !== anioActual);
 
   const cambiarRango = (nuevoRango) => {
     router.get(
@@ -84,8 +87,30 @@ export default function AdminContabilidad({ resumen, series, rango, anio, anios 
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               <Button size="sm" variant={rango === 'hoy' ? 'secondary' : 'outlineGray'} onClick={() => cambiarRango('hoy')}>Hoy</Button>
-              <Button size="sm" variant={rango === '7d' ? 'secondary' : 'outlineGray'} onClick={() => cambiarRango('7d')}>7 días</Button>
-              <Button size="sm" variant={rango === 'mes' ? 'secondary' : 'outlineGray'} onClick={() => cambiarRango('mes')}>Mes</Button>
+              <Button
+                size="sm"
+                disabled={soloRangoAnual}
+                variant={rango === 'hoy' ? 'secondary' : 'outlineGray'}
+                onClick={() => cambiarRango('hoy')}
+              >
+                Hoy
+              </Button>
+              <Button
+                size="sm"
+                disabled={soloRangoAnual}
+                variant={rango === '7d' ? 'secondary' : 'outlineGray'}
+                onClick={() => cambiarRango('7d')}
+              >
+                7 días
+              </Button>
+              <Button
+                size="sm"
+                disabled={soloRangoAnual}
+                variant={rango === 'mes' ? 'secondary' : 'outlineGray'}
+                onClick={() => cambiarRango('mes')}
+              >
+                Mes
+              </Button>
               <Button size="sm" variant={rango === 'anio' ? 'secondary' : 'outlineGray'} onClick={() => cambiarRango('anio')}>Año</Button>
             </div>
             <select
@@ -99,6 +124,11 @@ export default function AdminContabilidad({ resumen, series, rango, anio, anios 
               ))}
             </select>
           </div>
+          {soloRangoAnual ? (
+            <p className="mt-3 text-xs text-slate-500">
+              Para años cerrados solo está disponible el rango anual.
+            </p>
+          ) : null}
 
           <div className="mt-4 grid gap-4 md:grid-cols-3">
             <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
