@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useForm, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/renova-layout';
 import { Button } from '@/components/ui/button';
@@ -129,7 +129,7 @@ export default function Crud({ nombre_ruta, datos, columnas, campos }) {
     });
   };
 
-  const columnasTabla = useMemo(() => [
+  const columnasTabla = [
     ...columnas.map((columna) => ({
       accessorKey: columna,
       header: columna,
@@ -152,7 +152,7 @@ export default function Crud({ nombre_ruta, datos, columnas, campos }) {
         );
       },
     },
-  ], [columnas]);
+  ];
 
   return (
     <AppLayout>

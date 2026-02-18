@@ -3,14 +3,11 @@ import { MaterialReactTable } from "material-react-table";
 import { MRT_Localization_ES } from 'material-react-table/locales/es';
 
 export function Tabla({ columns, data, pageSize = 5 }) {
-  const columnasSeguras = Array.isArray(columns) ? columns : [];
-  const filasSeguras = Array.isArray(data) ? data : [];
-
   return (
-    <div className="p-2 md:p-4">
+    <div className="p-4">
       <MaterialReactTable
-        columns={columnasSeguras}
-        data={filasSeguras}
+        columns={columns}
+        data={data}
         enableColumnActions={false}
         enableSorting
         enablePagination
@@ -31,24 +28,22 @@ export function Tabla({ columns, data, pageSize = 5 }) {
         }}
         muiTableHeadCellProps={{
           sx: {
-            backgroundColor: "#f8fafc",
-            color: "#334155",
-            fontWeight: 700,
-            fontSize: "12px",
-            textTransform: "uppercase",
-            letterSpacing: "0.04em",
+            background: "linear-gradient(90deg, #9747ff, #ff2e88)",
+            color: "white",
+            fontFamily: "'Helvetica_Now_Display:Bold', sans-serif",
+            fontSize: "18px",
           },
         }}
         muiTableBodyCellProps={{
           sx: {
-            color: "#334155",
-            fontSize: "14px",
+            fontFamily: "'Helvetica_Now_Display:Bold', sans-serif",
+            fontSize: "16px",
           },
         }}
         muiTableBodyRowProps={{
           sx: {
             "&:hover": {
-              backgroundColor: "#f8fafc",
+              background: "linear-gradient(90deg, #9747ff10, #ff2e8810)",
             },
           },
         }}
