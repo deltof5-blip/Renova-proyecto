@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
             MovilSeeder::class,
             CategoriaSeeder::class,
             ComponentesSeeder::class,
+            PedidosSeeder::class,
+            ReparacionesPabloSeeder::class,
         ]);
     }
 }

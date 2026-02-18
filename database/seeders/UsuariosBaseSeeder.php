@@ -11,6 +11,11 @@ class UsuariosBaseSeeder extends Seeder
     {
         $usuarios = [
             [
+                'name' => 'Pablo Renova',
+                'email' => 'pablo@renova.com',
+                'rol' => 'cliente',
+            ],
+            [
                 'name' => 'Tecnico Renova',
                 'email' => 'tecnico@renova.com',
                 'rol' => 'tecnico',
